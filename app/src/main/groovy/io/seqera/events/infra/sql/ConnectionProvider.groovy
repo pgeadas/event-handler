@@ -1,4 +1,4 @@
-package io.seqera.events.utils.db
+package io.seqera.events.infra.sql
 
 import groovy.sql.Sql
 

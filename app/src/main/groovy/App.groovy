@@ -1,13 +1,15 @@
 import com.sun.net.httpserver.HttpServer
 import groovy.sql.Sql
 import groovy.yaml.YamlSlurper
-import io.seqera.events.dao.EventDao
-import io.seqera.events.dao.SqlEventDao
-import io.seqera.events.handler.EventHandler
-import io.seqera.events.handler.Handler
+import io.seqera.events.api.http.v1.EventHandler
+import io.seqera.events.api.http.v1.Handler
+import io.seqera.events.domain.EventDao
+import io.seqera.events.infra.sql.ConnectionProvider
+import io.seqera.events.infra.sql.ConnectionProviderImpl
+import io.seqera.events.infra.sql.dao.SqlEventDao
+import io.seqera.events.usecases.FindEventsUseCase
+import io.seqera.events.usecases.SaveEventUseCase
 import io.seqera.events.utils.AppContext
-import io.seqera.events.utils.db.ConnectionProvider
-import io.seqera.events.utils.db.ConnectionProviderImpl
 
 class App {
 
@@ -19,9 +21,10 @@ class App {
 
     static void main(String[] args) {
         context = buildContext()
-        // Building dao
         EventDao dao = new SqlEventDao(context.connectionProvider.getConnection())
-        handlers = [new EventHandler(dao)]
+        FindEventsUseCase findEventsUseCase = new FindEventsUseCase(dao)
+        SaveEventUseCase saveEventUseCase = new SaveEventUseCase(dao)
+        handlers = [new EventHandler(findEventsUseCase, saveEventUseCase)]
         httpServer = startServer()
     }
 
