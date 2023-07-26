@@ -1,11 +1,11 @@
 import com.sun.net.httpserver.HttpServer
 import groovy.sql.Sql
+import groovy.yaml.YamlSlurper
 import io.seqera.events.dao.EventDao
 import io.seqera.events.dao.SqlEventDao
 import io.seqera.events.handler.EventHandler
 import io.seqera.events.handler.Handler
 import io.seqera.events.utils.AppContext
-import groovy.yaml.YamlSlurper
 import io.seqera.events.utils.db.ConnectionProvider
 import io.seqera.events.utils.db.ConnectionProviderImpl
 
@@ -31,25 +31,26 @@ class App {
         migrateDb()
         return new AppContext(connectionProvider: connectionProvider)
     }
+
     static HttpServer startServer() {
         return HttpServer.create(new InetSocketAddress(PORT), /*max backlog*/ 0).with {
             println "Server is listening on ${PORT}, hit Ctrl+C to exit."
-            for (def h : handlers){
+            for (def h : handlers) {
                 createContext(h.handlerPath, h)
             }
             start()
         }
     }
 
-    static migrateFrom(Sql sql, String migrationFolder){
+    static migrateFrom(Sql sql, String migrationFolder) {
         def folder = new File(App.classLoader.getResource(migrationFolder).toURI())
-        def migrationFiles = folder.listFiles  {it -> it.name.endsWith(".sql")}.sort {Long.parseLong(it)} as File[]
+        def migrationFiles = folder.listFiles { it -> it.name.endsWith(".sql") }.sort { Long.parseLong(it) } as File[]
         migrationFiles.each {
             sql.execute(it.text)
         }
     }
 
-    static ConnectionProvider buildConnectionProvider(){
+    static ConnectionProvider buildConnectionProvider() {
         def file = new File(App.class.getResource('/app.yaml').toURI())
         def conf = new YamlSlurper().parse(file)
         def databaseConfig = conf['app']['database']
@@ -62,8 +63,8 @@ class App {
         def file = new File(App.class.getResource('/app.yaml').toURI())
         def conf = new YamlSlurper().parse(file)
         def databaseConfig = conf['app']['database']
-        def sql  = connectionProvider.getConnection()
-        if(databaseConfig['migrations']) {
+        def sql = connectionProvider.getConnection()
+        if (databaseConfig['migrations']) {
             migrateFrom(sql, databaseConfig['migrations'] as String)
         }
         return sql

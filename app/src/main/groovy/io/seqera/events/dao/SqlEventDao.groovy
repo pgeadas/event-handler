@@ -10,7 +10,7 @@ class SqlEventDao implements EventDao {
     private Sql sql;
     def String tableName = "EVENT"
 
-    SqlEventDao(Sql sql){
+    SqlEventDao(Sql sql) {
         this.sql = sql;
     }
 
@@ -25,7 +25,7 @@ class SqlEventDao implements EventDao {
     @Override
     List<Event> list() {
         String query = """select * from ${tableName}"""
-        return sql.rows(query).collect {new Event(id:it.id, workspaceId: it.workspaceId, userId: it.userId, mem: it['mem'] as Long, cpu: it.cpu as Long, io:it.io as Long)}
+        return sql.rows(query).collect { new Event(id: it.id, workspaceId: it.workspaceId, userId: it.userId, mem: it['mem'] as Long, cpu: it.cpu as Long, io: it.io as Long) }
 
     }
 }

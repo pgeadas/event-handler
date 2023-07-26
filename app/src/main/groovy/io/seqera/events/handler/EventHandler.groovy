@@ -2,9 +2,9 @@ package io.seqera.events.handler
 
 import com.sun.net.httpserver.HttpExchange
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import io.seqera.events.dao.EventDao
-import groovy.json.JsonSlurper
 import io.seqera.events.dto.Event
 
 @CompileStatic
@@ -13,7 +13,7 @@ class EventHandler implements Handler {
     private EventDao eventDao
     private JsonSlurper json
 
-    EventHandler(EventDao dao){
+    EventHandler(EventDao dao) {
         this.eventDao = dao
         this.json = new JsonSlurper()
     }
@@ -36,9 +36,8 @@ class EventHandler implements Handler {
             }
             default -> http.sendResponseHeaders(405, 0)
         }
-
-
     }
+
     void handleGet(HttpExchange http) {
         def events = eventDao.list()
         http.responseHeaders.add("Content-type", "application/json")
@@ -48,6 +47,7 @@ class EventHandler implements Handler {
             out << response
         }
     }
+
     void handlePost(HttpExchange http) {
         def body = http.requestBody.text
         def event = this.json.parseText(body) as Event

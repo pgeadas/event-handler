@@ -5,7 +5,5 @@ import io.seqera.events.utils.db.ConnectionProvider
 
 @CompileStatic
 class AppContext {
-
     ConnectionProvider connectionProvider
-
 }

@@ -13,6 +13,6 @@ class ConnectionProviderImpl implements ConnectionProvider {
 
     @Override
     Sql getConnection() {
-        return  Sql.newInstance(serverUrl, username, password, driver)
+        return Sql.newInstance(serverUrl, username, password, driver)
     }
 }
