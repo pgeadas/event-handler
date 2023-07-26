@@ -1,8 +1,9 @@
-package io.seqera.events.dao
+package io.seqera.events.infra.sql.events
 
 import groovy.sql.Sql
 import groovy.transform.CompileStatic
-import io.seqera.events.dto.Event
+import io.seqera.events.domain.events.EventDao
+import io.seqera.events.domain.events.Event
 
 @CompileStatic
 class SqlEventDao implements EventDao {

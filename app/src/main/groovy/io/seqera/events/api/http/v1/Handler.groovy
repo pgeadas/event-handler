@@ -1,4 +1,4 @@
-package io.seqera.events.handler
+package io.seqera.events.api.http.v1
 
 import com.sun.net.httpserver.HttpHandler
 

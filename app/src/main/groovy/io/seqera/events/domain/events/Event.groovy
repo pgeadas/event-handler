@@ -1,4 +1,4 @@
-package io.seqera.events.dto
+package io.seqera.events.domain.events
 
 import groovy.transform.CompileStatic
 

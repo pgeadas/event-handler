@@ -1,7 +1,7 @@
 package io.seqera.events.utils
 
 import groovy.transform.CompileStatic
-import io.seqera.events.utils.db.ConnectionProvider
+import io.seqera.events.infra.sql.ConnectionProvider
 
 @CompileStatic
 class AppContext {
