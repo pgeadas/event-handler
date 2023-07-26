@@ -1,9 +1,18 @@
+<<<<<<<< HEAD:app/src/main/groovy/io/seqera/events/infra/sql/events/SqlEventDao.groovy
 package io.seqera.events.infra.sql.events
 
 import groovy.sql.Sql
 import groovy.transform.CompileStatic
 import io.seqera.events.domain.events.EventDao
 import io.seqera.events.domain.events.Event
+========
+package io.seqera.events.infra.sql.dao
+
+import groovy.sql.Sql
+import groovy.transform.CompileStatic
+import io.seqera.events.domain.Event
+import io.seqera.events.domain.EventDao
+>>>>>>>> 8a76af8 (Refactor code to follow clean architecture):app/src/main/groovy/io/seqera/events/infra/sql/dao/SqlEventDao.groovy
 
 @CompileStatic
 class SqlEventDao implements EventDao {

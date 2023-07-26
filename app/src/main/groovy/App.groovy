@@ -1,14 +1,14 @@
 import com.sun.net.httpserver.HttpServer
 import groovy.sql.Sql
 import groovy.yaml.YamlSlurper
+import io.seqera.events.api.http.v1.EventHandler
 import io.seqera.events.api.http.v1.Handler
-import io.seqera.events.api.http.v1.events.EventHandler
-import io.seqera.events.domain.events.EventDao
+import io.seqera.events.domain.EventDao
 import io.seqera.events.infra.sql.ConnectionProvider
 import io.seqera.events.infra.sql.ConnectionProviderImpl
-import io.seqera.events.infra.sql.events.SqlEventDao
-import io.seqera.events.usecases.find.FindEventsUseCase
-import io.seqera.events.usecases.save.SaveEventUseCase
+import io.seqera.events.infra.sql.dao.SqlEventDao
+import io.seqera.events.usecases.FindEventsUseCase
+import io.seqera.events.usecases.SaveEventUseCase
 import io.seqera.events.utils.AppContext
 
 class App {
