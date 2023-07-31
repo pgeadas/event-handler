@@ -1,4 +1,4 @@
-package io.seqera.events.domain
+package io.seqera.events.domain.pagination
 
 import groovy.transform.CompileStatic
 

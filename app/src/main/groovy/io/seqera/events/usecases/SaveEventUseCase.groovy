@@ -1,13 +1,13 @@
 package io.seqera.events.usecases
 
-import io.seqera.events.domain.Event
-import io.seqera.events.domain.EventDao
+import io.seqera.events.domain.event.Event
+import io.seqera.events.domain.event.EventRepository
 
 class SaveEventUseCase {
 
-    private final EventDao eventDao
+    private final EventRepository eventDao
 
-    SaveEventUseCase(EventDao eventDao) {
+    SaveEventUseCase(EventRepository eventDao) {
         this.eventDao = eventDao
     }
 

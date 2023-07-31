@@ -1,7 +1,7 @@
 package io.seqera.events
 
 import groovy.transform.CompileStatic
-import io.seqera.events.domain.Event
+import io.seqera.events.domain.event.Event
 
 @CompileStatic
 class EventsStub {

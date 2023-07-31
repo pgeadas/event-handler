@@ -1,8 +1,8 @@
 package io.seqera.events.usecases
 
 import io.seqera.events.EventsStub
-import io.seqera.events.domain.Event
-import io.seqera.events.domain.EventDao
+import io.seqera.events.domain.event.Event
+import io.seqera.events.domain.event.EventRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.params.ParameterizedTest
@@ -17,11 +17,11 @@ import static org.mockito.Mockito.*
 class SaveEventUseCaseTest {
 
     private SaveEventUseCase useCase
-    private EventDao eventDao
+    private EventRepository eventDao
 
     @BeforeEach
     void setUp() {
-        eventDao = mock(EventDao.class)
+        eventDao = mock(EventRepository.class)
         useCase = new SaveEventUseCase(eventDao)
     }
 

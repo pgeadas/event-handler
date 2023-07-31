@@ -1,19 +1,20 @@
 package io.seqera.events.usecases
 
-import io.seqera.events.domain.Event
-import io.seqera.events.domain.EventDao
-import io.seqera.events.domain.Ordering
-import io.seqera.events.domain.PageDetails
+import groovyjarjarantlr4.v4.runtime.misc.Nullable
+import io.seqera.events.domain.event.Event
+import io.seqera.events.domain.event.EventRepository
+import io.seqera.events.domain.pagination.Ordering
+import io.seqera.events.domain.pagination.PageDetails
 
 class FindEventsUseCase {
 
-    private final EventDao eventDao
+    private final EventRepository eventDao
 
-    FindEventsUseCase(EventDao eventDao) {
+    FindEventsUseCase(EventRepository eventDao) {
         this.eventDao = eventDao
     }
 
-    List<Event> retrievePage(PageDetails pageDetails, Ordering ordering = null) {
+    List<Event> retrievePage(PageDetails pageDetails, @Nullable Ordering ordering = null) {
         return eventDao.retrievePage(pageDetails, ordering)
     }
 }

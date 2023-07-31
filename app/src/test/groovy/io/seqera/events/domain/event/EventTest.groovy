@@ -1,4 +1,5 @@
-package io.seqera.events.domain
+package io.seqera.events.domain.event
+
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

@@ -2,21 +2,21 @@ package io.seqera.events.infra.sql.daos
 
 import groovy.transform.CompileStatic
 import groovyjarjarantlr4.v4.runtime.misc.Nullable
-import io.seqera.events.domain.Event
-import io.seqera.events.domain.EventDao
-import io.seqera.events.domain.Ordering
-import io.seqera.events.domain.PageDetails
+import io.seqera.events.domain.event.Event
+import io.seqera.events.domain.event.EventRepository
+import io.seqera.events.domain.pagination.Ordering
+import io.seqera.events.domain.pagination.PageDetails
 
-/** The purpose of the InMemoryEventDao is just to exemplify how we could easily swap between different Adapters
+/** The purpose of the InMemoryEventRepository is just to exemplify how we could easily swap between different Adapters
  * and how we do not need to modify or create new tests by simply testing the dao (repository) contract.
  * From UnitTests it is often preferred to use a fake database like this one, so the contract testing ensures that
  * all implementations show the same behaviour **/
 @CompileStatic
-class InMemoryEventDao implements EventDao {
+class InMemoryEventRepository implements EventRepository {
 
     private List<Event> eventList
 
-    InMemoryEventDao(List<Event> eventList) {
+    InMemoryEventRepository(List<Event> eventList) {
         this.eventList = eventList
     }
 

@@ -1,10 +1,10 @@
 package io.seqera.events.infra.sql.daos
 
 import io.seqera.events.EventsStub
-import io.seqera.events.domain.Event
-import io.seqera.events.domain.EventDao
-import io.seqera.events.domain.Ordering
-import io.seqera.events.domain.PageDetails
+import io.seqera.events.domain.event.Event
+import io.seqera.events.domain.event.EventRepository
+import io.seqera.events.domain.pagination.Ordering
+import io.seqera.events.domain.pagination.PageDetails
 import org.assertj.core.api.Assertions as AssertJAssertions
 import org.junit.jupiter.api.Assertions as JUnit5Assertions
 import org.junit.jupiter.api.Test
@@ -15,7 +15,7 @@ import org.junit.jupiter.params.provider.CsvSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class EventRepositoryContractTest {
 
-    abstract EventDao populateDB(List<Event> events)
+    abstract EventRepository populateDB(List<Event> events)
 
     @Test
     void """given pageNumber is valid

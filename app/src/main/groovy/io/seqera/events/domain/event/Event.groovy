@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:app/src/main/groovy/io/seqera/events/domain/events/Event.groovy
-package io.seqera.events.domain.events
-========
-package io.seqera.events.domain
->>>>>>>> 8a76af8 (Refactor code to follow clean architecture):app/src/main/groovy/io/seqera/events/domain/Event.groovy
+package io.seqera.events.domain.event
 
 import groovy.transform.CompileStatic
 
