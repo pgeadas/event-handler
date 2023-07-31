@@ -1,8 +1,7 @@
 package io.seqera.events.domain
 
-interface EventDao {
+interface EventDao extends Pagination<Event> {
 
     Event save(Event event)
 
-    List<Event> list();
 }
