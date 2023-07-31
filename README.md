@@ -10,13 +10,13 @@ testing frameworks: unless differently specified in the issue no additional depe
 should be explicitly added to the project.
 
 The startup of the process is centralized in
-the [io.seqera.events.App.groovy](app/src/main/groovy/io.seqera.events.App.groovy)
+the [App.groovy](app/src/main/groovy/io/seqera/events/App.groovy)
 which takes care of:
 
 - starting the server
-- configuring the [handler](app/src/main/groovy/io/seqera/events/handler/EventHandler.groovy)
+- configuring the [handler](app/src/main/groovy/io/seqera/events/application/handlers/EventHandler.groovy)
 - configuring
-  the [database connection provider](app/src/main/groovy/io/seqera/events/utils/db/ConnectionProvider.groovy)
+  the [database connection provider](app/src/main/groovy/io/seqera/events/infra/sql/providers/ConnectionProvider.groovy)
 - migration of database tables
 
 A minimal request example can be found using the [event.http](event.http) (IntelliJ internal http client tester)

@@ -8,13 +8,13 @@ import io.seqera.events.domain.pagination.PageDetails
 
 class FindEventsUseCase {
 
-    private final EventRepository eventDao
+    private final EventRepository repository
 
-    FindEventsUseCase(EventRepository eventDao) {
-        this.eventDao = eventDao
+    FindEventsUseCase(EventRepository repository) {
+        this.repository = repository
     }
 
     List<Event> retrievePage(PageDetails pageDetails, @Nullable Ordering ordering = null) {
-        return eventDao.retrievePage(pageDetails, ordering)
+        return repository.retrievePage(pageDetails, ordering)
     }
 }

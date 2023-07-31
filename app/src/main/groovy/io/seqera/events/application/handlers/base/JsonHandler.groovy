@@ -8,9 +8,9 @@ import groovy.transform.CompileStatic
 @CompileStatic
 abstract class JsonHandler implements Handler {
 
-    protected final JsonSlurper json
+    private final JsonSlurper json
 
-    JsonHandler() {
+    protected JsonHandler() {
         this.json = new JsonSlurper()
     }
 
@@ -21,5 +21,9 @@ abstract class JsonHandler implements Handler {
         http.responseBody.withWriter { out ->
             out << response
         }
+    }
+
+    Object parseText(String text) {
+        return json.parseText(text)
     }
 }

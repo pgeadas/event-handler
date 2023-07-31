@@ -13,15 +13,21 @@ interface Pagination<T> {
             @Nullable Ordering ordering = null,
             @Nullable Closure<Boolean> columnNameValidator = null) {
         if (pageDetails.itemCount <= 0) {
-            println "Validation Error (itemCount): ${pageDetails.itemCount}"
+            println "Validation Error (itemCount): $pageDetails.itemCount"
             return false
         }
         if (pageDetails.pageNumber < 0) {
-            println "Validation Error (pageNumber): ${pageDetails.pageNumber}"
+            println "Validation Error (pageNumber): $pageDetails.pageNumber"
             return false
         }
-        if (ordering && columnNameValidator && !columnNameValidator.call(ordering.orderBy)) {
-            println "Validation Error (orderBy): ${ordering.orderBy}"
+        if (!ordering) {
+            return true
+        } else if (columnNameValidator == null) {
+            println "Validation Error (must provide columnNameValidator when Ordering is enabled) "
+            return false
+        }
+        if (!columnNameValidator.call(ordering.orderBy)) {
+            println "Validation Error (orderBy): $ordering.orderBy"
             return false
         }
         return true

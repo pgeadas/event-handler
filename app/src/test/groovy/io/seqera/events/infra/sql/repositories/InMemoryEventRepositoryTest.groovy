@@ -1,4 +1,4 @@
-package io.seqera.events.infra.sql.daos
+package io.seqera.events.infra.sql.repositories
 
 import io.seqera.events.domain.event.Event
 import io.seqera.events.domain.event.EventRepository

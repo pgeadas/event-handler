@@ -9,52 +9,37 @@ import io.seqera.events.domain.pagination.PageDetails
 import io.seqera.events.usecases.FindEventsUseCase
 import io.seqera.events.usecases.SaveEventUseCase
 import io.seqera.events.utils.HttpStatus
+import io.seqera.events.utils.QueryParamParser
+
+// TODO: list of improvements
+// 0: support for multiple columns in orderBy. Add and clause to select
+// 1: add Logger instead of print
+// 2: add async processing of requests (queue)
+// 3: open api specs
+// 4: Flyway for automatic migrations
+// 5: add a wrapper for response data
+// 6: tests for the properties and defaults
+// 7: use sort=asc and desc
 
 @CompileStatic
 class EventHandler extends JsonHandler {
 
-    private static final String INVALID_PARAMS_MESSAGE = 'request.invalid.params'
-    private static final String DEFAULT_INVALID_PARAMS_MESSAGE = 'Invalid params'
-
-    private static final String MISSING_PARAMS_MESSAGE = 'request.missing.params'
-    private static final String DEFAULT_MISSING_PARAMS_MESSAGE = 'Missing params'
-
-    private static final String INTERNAL_SERVER_ERROR_MESSAGE = 'internal.server-error'
-    private static final String DEFAULT_INTERNAL_SERVER_ERROR_MESSAGE = 'Internal server error'
-
-    private static final String INVALID_BODY_MESSAGE = 'request.invalid.body'
-    private static final String DEFAULT_INVALID_BODY_MESSAGE = 'Invalid request body'
-
-    private static final String MAX_ITEM_COUNT = 'request.get.defaults.itemCount'
-    private static final int DEFAULT_MAX_ITEM_COUNT = 200
-
-    private static final String ORDER_BY = 'request.get.defaults.orderBy'
-    private static final String DEFAULT_ORDER_BY = null
-
-    private static final String ASCENDING = 'request.get.defaults.ascending'
-    private static final String DEFAULT_ASCENDING = 'true'
-
+    private final QueryParamValidator queryParamValidator
     private final FindEventsUseCase findEventsUseCase
     private final SaveEventUseCase saveEventUseCase
     private final Properties properties
-    private final int maxItemCountParsed
+    private final QueryParamParser paramParser
 
     EventHandler(
             FindEventsUseCase findEventsUseCase,
             SaveEventUseCase saveEventUseCase,
-            Properties properties) {
+            Properties properties,
+            QueryParamParser paramParser) {
         this.findEventsUseCase = findEventsUseCase
         this.saveEventUseCase = saveEventUseCase
         this.properties = properties
-        this.maxItemCountParsed = parseMaxItemCountFromProperties(properties)
-    }
-
-    private static int parseMaxItemCountFromProperties(Properties properties) {
-        try {
-            return properties.getProperty(MAX_ITEM_COUNT) as int
-        } catch (Exception ignored) {
-            return DEFAULT_MAX_ITEM_COUNT
-        }
+        this.paramParser = paramParser
+        this.queryParamValidator = new QueryParamValidator(properties)
     }
 
     @Override
@@ -65,74 +50,73 @@ class EventHandler extends JsonHandler {
     @Override
     void handle(HttpExchange http) throws IOException {
         switch (http.requestMethod) {
-            case "POST" -> {
-                handlePost(http)
-            }
-            case "GET" -> {
-                handleGet(http)
-            }
+            case "POST" -> handlePost(http)
+            case "GET" -> handleGet(http)
             default -> http.sendResponseHeaders(HttpStatus.MethodNotAllowed.code, 0)
         }
     }
 
-    // TODO: open api specs
-    // TODO: tests controller
-    // TODO: Async processing
     void handleGet(HttpExchange http) {
         def query = getQueryString(http)
-        def queryParams = parseQueryParams(query)
-
-        if (!hasPageNumberAndItemCount(queryParams)) {
-            sendResponse(http, missingParamsMessageOrDefault("pageNumber/itemCount"), HttpStatus.BadRequest.code)
+        if (!query) {
+            println queryParamValidator.missingParamsMessageOrDefault("pageNumber/itemCount")
+            sendResponse(http, queryParamValidator.missingParamsMessageOrDefault("pageNumber/itemCount"), HttpStatus.BadRequest.code)
             return
         }
 
-        Long pageNumber = validatePageNumber(queryParams)
+        def queryParams = paramParser.parseQueryParams(query)
+
+        if (!queryParamValidator.hasPageNumberAndItemCount(queryParams)) {
+            println queryParamValidator.missingParamsMessageOrDefault("pageNumber/itemCount")
+            sendResponse(http, queryParamValidator.missingParamsMessageOrDefault("pageNumber/itemCount"), HttpStatus.BadRequest.code)
+            return
+        }
+
+        Long pageNumber = queryParamValidator.validatePageNumber(queryParams)
         if (!pageNumber) {
-            sendResponse(http, invalidParamsMessageOrDefault("pageNumber"), HttpStatus.BadRequest.code)
+            println queryParamValidator.invalidParamsMessageOrDefault("pageNumber")
+            sendResponse(http, queryParamValidator.invalidParamsMessageOrDefault("pageNumber"), HttpStatus.BadRequest.code)
             return
         }
 
-        Integer itemCount = validateItemCount(queryParams)
+        Integer itemCount = queryParamValidator.validateItemCount(queryParams)
         if (!itemCount) {
-            sendResponse(http, invalidParamsMessageOrDefault("itemCount"), HttpStatus.BadRequest.code)
+            println queryParamValidator.invalidParamsMessageOrDefault("itemCount")
+            sendResponse(http, queryParamValidator.invalidParamsMessageOrDefault("itemCount"), HttpStatus.BadRequest.code)
             return
         }
 
-        PageDetails pageDetails = validatePageDetails(pageNumber, itemCount)
+        PageDetails pageDetails = queryParamValidator.validatePageDetails(pageNumber, itemCount)
         if (!pageDetails) {
-            sendResponse(http, invalidParamsMessageOrDefault("pageNumber/itemCount"), HttpStatus.BadRequest.code)
+            println queryParamValidator.invalidParamsMessageOrDefault("pageNumber/itemCount")
+            sendResponse(http, queryParamValidator.invalidParamsMessageOrDefault("pageNumber/itemCount"), HttpStatus.BadRequest.code)
             return
         }
 
-        // TODO: support for multiple columns in orderBy
-        Ordering ordering = validateOrdering(queryParams, properties)
+        Ordering ordering = queryParamValidator.validateOrdering(queryParams, properties)
         if (!ordering) {
-            sendResponse(http, invalidParamsMessageOrDefault("orderBy/asc"), HttpStatus.BadRequest.code)
+            println queryParamValidator.invalidParamsMessageOrDefault("orderBy/asc")
+            sendResponse(http, queryParamValidator.invalidParamsMessageOrDefault("orderBy/asc"), HttpStatus.BadRequest.code)
             return
         }
 
         def events = retrievePage(pageDetails, ordering)
-        if (events) {
+        if (events != null) {
+            println "Ok ($pageDetails, $ordering) -> events=$events"
             sendResponse(http, events, HttpStatus.Ok.code)
         } else {
-            sendResponse(http, internalServerErrorMessageOrDefault(), HttpStatus.InternalServerError.code)
+            println queryParamValidator.internalServerErrorMessageOrDefault()
+            sendResponse(http, queryParamValidator.internalServerErrorMessageOrDefault(), HttpStatus.InternalServerError.code)
         }
 
     }
 
-    private String internalServerErrorMessageOrDefault() {
-        return properties.getProperty(INTERNAL_SERVER_ERROR_MESSAGE, DEFAULT_INTERNAL_SERVER_ERROR_MESSAGE)
+    private static String getQueryString(HttpExchange http) {
+        return http.requestURI.query
     }
 
-    private String missingParamsMessageOrDefault(String param) {
-        def message = properties.getProperty(MISSING_PARAMS_MESSAGE, DEFAULT_MISSING_PARAMS_MESSAGE)
-        return "$message: $param"
-    }
-
-    private String invalidParamsMessageOrDefault(String param) {
-        def message = properties.getProperty(INVALID_PARAMS_MESSAGE, DEFAULT_INVALID_PARAMS_MESSAGE)
-        return "$message: $param"
+    private static String getRequestBody(HttpExchange http) {
+        return http.requestBody.text
     }
 
     private List<Event> retrievePage(PageDetails pageDetails, Ordering ordering) {
@@ -144,79 +128,14 @@ class EventHandler extends JsonHandler {
         }
     }
 
-    private static Ordering validateOrdering(Map<String, String> queryParams, Properties properties) {
-        String orderBy
-        if (!queryParams["orderby"]) {
-            orderBy = properties.getProperty(ORDER_BY, DEFAULT_ORDER_BY)
-        } else {
-            orderBy = queryParams["orderby"]
-        }
-        if (isInvalidOrderBy(orderBy)) {
-            println "Error validating orderBy: found ${orderBy}"
-            return null
-        }
-
-        boolean isAscending
-        try {
-            if (!queryParams["asc"]) {
-                isAscending = properties.getProperty(ASCENDING, DEFAULT_ASCENDING).toBoolean()
-            } else {
-                isAscending = queryParams["asc"].toBoolean()
-            }
-        } catch (RuntimeException ex) {
-            println "Error validating isAscending: ${ex.message}"
-            return null
-        }
-
-        return Ordering.of(orderBy, isAscending)
-    }
-
-    private static boolean isInvalidOrderBy(String orderBy) {
-        return orderBy != null && !Event.isFieldNameValid(orderBy)
-    }
-
-    private static Long validatePageNumber(Map<String, String> queryParams) {
-        try {
-            return queryParams["pageNumber"] as Long
-        } catch (NumberFormatException ex) {
-            println "Error validating pageNumber: ${ex.message}"
-            return null
-        }
-    }
-
-    private Integer validateItemCount(Map<String, String> queryParams) {
-        try {
-            def itemCount = queryParams["itemCount"] as Integer
-            if (itemCount > maxItemCountParsed) {
-                println "ItemCount ($itemCount) is bigger than max allowed ($maxItemCountParsed)}"
-                return maxItemCountParsed
-            }
-        } catch (NumberFormatException ex) {
-            println "Error validating itemCount: ${ex.message}"
-            return null
-        }
-    }
-
-    private static PageDetails validatePageDetails(long pageNumber, int itemCount) {
-        try {
-            return PageDetails.of(pageNumber, itemCount)
-        } catch (IllegalArgumentException ex) {
-            println "Error creating PageDetails: ${ex.message}"
-            return null
-        }
-    }
-
-    private static boolean hasPageNumberAndItemCount(Map<String, String> queryParams) {
-        return queryParams["pagenumber"] && queryParams["itemcount"]
-    }
-
     void handlePost(HttpExchange http) {
         def body = getRequestBody(http)
-        def event = json.parseText(body) as Event
+        def event = parseText(body) as Event
         if (!event) {
+            println "Error parsing body: $body"
             sendResponse(
                     http,
-                    properties.getProperty(INVALID_BODY_MESSAGE, DEFAULT_INVALID_BODY_MESSAGE),
+                    queryParamValidator.invalidBodyMessageOrDefault(),
                     HttpStatus.BadRequest.code
             )
             return
@@ -228,21 +147,132 @@ class EventHandler extends JsonHandler {
             println "Error saving event: $ex.stackTrace"
             sendResponse(
                     http,
-                    properties.getProperty(INTERNAL_SERVER_ERROR_MESSAGE, DEFAULT_INTERNAL_SERVER_ERROR_MESSAGE),
+                    queryParamValidator.internalServerErrorMessageOrDefault(),
                     HttpStatus.InternalServerError.code
             )
         }
     }
 
     @CompileStatic
-    class QueryParamValidator {
+    private class QueryParamValidator {
+
+        private static final String INVALID_PARAMS_MESSAGE = 'request.invalid.params'
+        private static final String DEFAULT_INVALID_PARAMS_MESSAGE = 'Invalid params'
+
+        private static final String MISSING_PARAMS_MESSAGE = 'request.missing.params'
+        private static final String DEFAULT_MISSING_PARAMS_MESSAGE = 'Missing params'
+
+        private static final String INTERNAL_SERVER_ERROR_MESSAGE = 'internal.server-error'
+        private static final String DEFAULT_INTERNAL_SERVER_ERROR_MESSAGE = 'Internal server error'
+
+        private static final String INVALID_BODY_MESSAGE = 'request.invalid.body'
+        private static final String DEFAULT_INVALID_BODY_MESSAGE = 'Invalid request body'
+
+        private static final String MAX_ITEM_COUNT = 'request.get.defaults.itemCount'
+        private static final int DEFAULT_MAX_ITEM_COUNT = 200
+
+        private static final String ORDER_BY = 'request.get.defaults.orderBy'
+        private static final String DEFAULT_ORDER_BY = null
+
+        private static final String ASCENDING = 'request.get.defaults.ascending'
+        private static final String DEFAULT_ASCENDING = 'true'
+
         private final Properties properties
         private final int maxItemCountParsed
 
-        QueryParamValidator(Properties properties, int maxItemCountParsed) {
+        private QueryParamValidator(Properties properties) {
             this.properties = properties
-            this.maxItemCountParsed = maxItemCountParsed
+            this.maxItemCountParsed = parseMaxItemCountFromProperties()
         }
 
+        private int parseMaxItemCountFromProperties() {
+            try {
+                return properties.getProperty(MAX_ITEM_COUNT) as int
+            } catch (RuntimeException ex) {
+                println """Error parsing maxItemCount from properties: $ex.stackTrace.
+                        \nUsing default maxItemCount: $DEFAULT_MAX_ITEM_COUNT"""
+                return DEFAULT_MAX_ITEM_COUNT
+            }
+        }
+
+        private String invalidBodyMessageOrDefault() {
+            return properties.getProperty(INVALID_BODY_MESSAGE, DEFAULT_INVALID_BODY_MESSAGE)
+        }
+
+        private String internalServerErrorMessageOrDefault() {
+            return properties.getProperty(INTERNAL_SERVER_ERROR_MESSAGE, DEFAULT_INTERNAL_SERVER_ERROR_MESSAGE)
+        }
+
+        private String missingParamsMessageOrDefault(String param) {
+            def message = properties.getProperty(MISSING_PARAMS_MESSAGE, DEFAULT_MISSING_PARAMS_MESSAGE)
+            return "$message: $param"
+        }
+
+        private String invalidParamsMessageOrDefault(String param) {
+            def message = properties.getProperty(INVALID_PARAMS_MESSAGE, DEFAULT_INVALID_PARAMS_MESSAGE)
+            return "$message: $param"
+        }
+
+        private static boolean isInvalidOrderBy(String orderBy) {
+            return orderBy != null && !Event.isFieldNameValid(orderBy)
+        }
+
+        private static Long validatePageNumber(Map<String, String> queryParams) {
+            try {
+                return queryParams["pagenumber"] as Long
+            } catch (NumberFormatException ex) {
+                println "Error validating pageNumber: $ex.message"
+                return null
+            }
+        }
+
+        private Integer validateItemCount(Map<String, String> queryParams) {
+            try {
+                Integer itemCount = queryParams["itemcount"] as Integer
+                if (itemCount > maxItemCountParsed) {
+                    println "ItemCount ($itemCount) is bigger than max allowed ($maxItemCountParsed)}"
+                    return maxItemCountParsed
+                }
+                return itemCount
+            } catch (NumberFormatException ex) {
+                println "Error validating itemCount: $ex.message"
+                return null
+            }
+        }
+
+        private static PageDetails validatePageDetails(long pageNumber, int itemCount) {
+            try {
+                return PageDetails.of(pageNumber, itemCount)
+            } catch (IllegalArgumentException ex) {
+                println "Error creating PageDetails: $ex.message"
+                return null
+            }
+        }
+
+        private static boolean hasPageNumberAndItemCount(Map<String, String> queryParams) {
+            return queryParams["pagenumber"] && queryParams["itemcount"]
+        }
+
+        private static Ordering validateOrdering(Map<String, String> queryParams, Properties properties) {
+            String orderBy
+            if (!queryParams["orderby"]) {
+                orderBy = properties.getProperty(ORDER_BY, DEFAULT_ORDER_BY)
+            } else {
+                orderBy = queryParams["orderby"]
+            }
+            if (isInvalidOrderBy(orderBy)) {
+                println "Error validating orderBy: found $orderBy"
+                return null
+            }
+
+            boolean isAscending
+            if (!queryParams["asc"]) {
+                isAscending = Boolean.parseBoolean(properties.getProperty(ASCENDING, DEFAULT_ASCENDING))
+            } else {
+                isAscending = Boolean.parseBoolean(queryParams["asc"])
+            }
+
+            return Ordering.of(orderBy, isAscending)
+        }
     }
 }

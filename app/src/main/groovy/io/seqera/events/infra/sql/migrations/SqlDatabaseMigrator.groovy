@@ -1,4 +1,4 @@
-package io.seqera.events.infra.sql
+package io.seqera.events.infra.sql.migrations
 
 import groovy.sql.Sql
 import groovy.transform.CompileStatic
@@ -31,30 +31,19 @@ class SqlDatabaseMigrator {
         if (!url) {
             throw new RuntimeException("Resource not found: $migrationFolder")
         }
-        println("URI: " + url.toURI())
+        println "Loading migrations folder: ${url.toURI()}"
         if (url.toURI().scheme == "file") {
             return new File(url.toURI())
         }
 
+        // TODO: fix reading from jar
         def inputStream = getClass().getResourceAsStream("/${migrationFolder}")
-
-// TODO: fix reading from jar
-//        url = getClass().classLoader.getResource("/${migrationFolder}").toURI()
-
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
         return reader.readLines()
                 .findAll { line -> line.endsWith('.sql') }
                 .collect { fileName -> new File(fileName) }
                 .sort { file -> Long.parseLong(file.name) }
                 .first()
-
-// TODO: fix reading from jar
-//        def temp = File.createTempFile("temp-", ".tmp")
-//        temp.withOutputStream { outputStream ->
-//            url.openStream().withStream { inputStream ->
-//                outputStream << inputStream
-//            }
-//        } as File
     }
 
     private static void migrate(Sql sql, File[] migrationFiles) {

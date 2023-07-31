@@ -1,4 +1,4 @@
-package io.seqera.events.infra.sql.daos
+package io.seqera.events.infra.sql.repositories
 
 import io.seqera.events.EventsStub
 import io.seqera.events.domain.event.Event
@@ -96,7 +96,7 @@ abstract class EventRepositoryContractTest {
         def details = PageDetails.of(1, eventCount)
         Ordering ordering = Ordering.of("userId", isAscending)
 
-        def dao = populateDB(EventsStub.withEventsString(eventCount, EventsStub.&withUserId))
+        def dao = populateDB(EventsStub.createEventsStringClosure(eventCount, EventsStub.&withUserId))
 
         def events = dao.retrievePage(details, ordering)
 
@@ -119,7 +119,7 @@ abstract class EventRepositoryContractTest {
         def details = PageDetails.of(1, eventCount)
         Ordering ordering = Ordering.of("cpu", isAscending)
 
-        def dao = populateDB(EventsStub.createEventsInt(eventCount, EventsStub.&withCpu))
+        def dao = populateDB(EventsStub.createEventsIntClosure(eventCount, EventsStub.&withCpu))
 
         def events = dao.retrievePage(details, ordering)
 
@@ -138,7 +138,7 @@ abstract class EventRepositoryContractTest {
         def details = PageDetails.of(1, eventCount)
         Ordering ordering = null
 
-        def dao = populateDB(EventsStub.createEventsInt(eventCount, EventsStub.&withCpu))
+        def dao = populateDB(EventsStub.createEventsIntClosure(eventCount, EventsStub.&withCpu))
 
         def events = dao.retrievePage(details, ordering)
 
