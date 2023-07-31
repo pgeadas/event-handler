@@ -1,8 +1,8 @@
 package io.seqera.events.usecases
 
-import io.seqera.events.domain.EventDao
-import io.seqera.events.domain.Ordering
-import io.seqera.events.domain.PageDetails
+import io.seqera.events.domain.event.EventRepository
+import io.seqera.events.domain.pagination.Ordering
+import io.seqera.events.domain.pagination.PageDetails
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -11,11 +11,11 @@ import static org.mockito.Mockito.*
 class FindEventsUseCaseTest {
 
     private FindEventsUseCase useCase
-    private EventDao eventDao
+    private EventRepository eventDao
 
     @BeforeEach
     void setUp() {
-        eventDao = mock(EventDao.class)
+        eventDao = mock(EventRepository.class)
         useCase = new FindEventsUseCase(eventDao)
     }
 

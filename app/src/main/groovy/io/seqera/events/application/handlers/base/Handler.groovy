@@ -5,7 +5,7 @@ import com.sun.net.httpserver.HttpHandler
 
 interface Handler extends HttpHandler {
 
-    default Map<String, String> parseQueryParameters(String query) {
+    default Map<String, String> parseQueryParams(String query) {
         Map<String, String> queryParametersMap = [:]
         String[] parameterPairs = query.split('&')
 

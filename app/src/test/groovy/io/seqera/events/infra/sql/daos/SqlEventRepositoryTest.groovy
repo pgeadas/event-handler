@@ -2,22 +2,22 @@ package io.seqera.events.infra.sql.daos
 
 import groovy.sql.Sql
 import groovy.yaml.YamlSlurper
-import io.seqera.events.domain.Event
-import io.seqera.events.domain.EventDao
+import io.seqera.events.domain.event.Event
+import io.seqera.events.domain.event.EventRepository
 import io.seqera.events.infra.sql.SqlDatabaseMigrator
 import io.seqera.events.infra.sql.providers.SqlContextProvider
 import io.seqera.events.utils.ConnectionProviderFactory
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 
-class SqlEventDaoTest extends EventRepositoryContractTest {
+class SqlEventRepositoryTest extends EventRepositoryContractTest {
 
     private static final String CONFIG_NAME = 'app-test.yaml'
     private static final String TABLE_NAME = "EVENT"
-    private EventDao eventDao
+    private EventRepository eventDao
     private Sql connection
 
-    SqlEventDaoTest() {
+    SqlEventRepositoryTest() {
         SqlContextProvider contextProvider = new SqlContextProvider(
                 CONFIG_NAME,
                 new ConnectionProviderFactory(),
@@ -26,7 +26,7 @@ class SqlEventDaoTest extends EventRepositoryContractTest {
         )
         def connectionProvider = contextProvider.buildContext()
         connection = connectionProvider.getConnection()
-        eventDao = new SqlEventDao(connection, TABLE_NAME)
+        eventDao = new SqlEventRepository(connection, TABLE_NAME)
     }
 
     @AfterEach
@@ -43,7 +43,7 @@ class SqlEventDaoTest extends EventRepositoryContractTest {
     }
 
     @Override
-    EventDao populateDB(List<Event> events) {
+    EventRepository populateDB(List<Event> events) {
         for (Event event : events) {
             String query = """insert into ${TABLE_NAME}(workspaceId, userId, cpu, mem, io) 
                               values ('$event.workspaceId','$event.userId',$event.cpu,$event.mem,$event.io)"""

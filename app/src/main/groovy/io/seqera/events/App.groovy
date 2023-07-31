@@ -4,9 +4,9 @@ import com.sun.net.httpserver.HttpServer
 import groovy.yaml.YamlSlurper
 import io.seqera.events.application.handlers.EventHandler
 import io.seqera.events.application.handlers.base.Handler
-import io.seqera.events.domain.EventDao
+import io.seqera.events.domain.event.EventRepository
 import io.seqera.events.infra.sql.SqlDatabaseMigrator
-import io.seqera.events.infra.sql.daos.SqlEventDao
+import io.seqera.events.infra.sql.daos.SqlEventRepository
 import io.seqera.events.infra.sql.providers.SqlContextProvider
 import io.seqera.events.usecases.FindEventsUseCase
 import io.seqera.events.usecases.SaveEventUseCase
@@ -28,7 +28,7 @@ class App {
         def connectionProvider = contextProvider.buildContext()
         def connection = connectionProvider.getConnection()
 
-        EventDao dao = new SqlEventDao(connection, EVENT)
+        EventRepository dao = new SqlEventRepository(connection, EVENT)
 
         FindEventsUseCase findEventsUseCase = new FindEventsUseCase(dao)
         SaveEventUseCase saveEventUseCase = new SaveEventUseCase(dao)
