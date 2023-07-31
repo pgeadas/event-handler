@@ -5,7 +5,7 @@ import io.seqera.events.domain.EventDao
 
 class SaveEventUseCase {
 
-    private EventDao eventDao
+    private final EventDao eventDao
 
     SaveEventUseCase(EventDao eventDao) {
         this.eventDao = eventDao

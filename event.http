@@ -1,5 +1,6 @@
 ### GET request with a header
-GET http://localhost:8000/events
+GET http://localhost:8000/events?pagenumber=1&itemCount=10&orderBy=io&asc=true
+
 ### POST request with a header
 POST http://localhost:8000/events
 Content-Type: application/json
@@ -7,7 +8,9 @@ Content-Type: application/json
 {
   "workspaceId": "workspaceId",
   "userId": "userId",
-  "mem": 100,
+  "mem": 10,
   "cpu": 80,
   "io": 4
 }
+
+
