@@ -1,4 +1,4 @@
-package io.seqera.events.infra.sql.daos
+package io.seqera.events.infra.sql.repositories
 
 import groovy.transform.CompileStatic
 import groovyjarjarantlr4.v4.runtime.misc.Nullable
@@ -38,7 +38,7 @@ class InMemoryEventRepository implements EventRepository {
 
     @Override
     List retrievePage(PageDetails pageDetails, @Nullable Ordering ordering) {
-        if (!validateArguments(pageDetails, ordering)) {
+        if (!validateArguments(pageDetails, ordering, Event.&isFieldNameValid)) {
             return []
         }
 

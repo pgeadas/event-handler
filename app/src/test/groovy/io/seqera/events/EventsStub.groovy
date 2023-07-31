@@ -13,7 +13,7 @@ class EventsStub {
     public static final long CPU = 30
     public static final int IO = 40
 
-    static List<Event> withEventsString(int count, Closure<Event> eventCreationClosure) {
+    static List<Event> createEventsStringClosure(int count, Closure<Event> eventCreationClosure) {
         List<Event> events = []
         for (c in 0..<count) {
             events << eventCreationClosure(c as String)
@@ -21,7 +21,7 @@ class EventsStub {
         return events
     }
 
-    static List<Event> createEventsInt(int count, Closure<Event> eventCreationClosure) {
+    static List<Event> createEventsIntClosure(int count, Closure<Event> eventCreationClosure) {
         List<Event> events = []
         for (c in 0..<count) {
             events << eventCreationClosure(c)

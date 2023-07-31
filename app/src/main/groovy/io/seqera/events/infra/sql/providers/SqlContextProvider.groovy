@@ -2,7 +2,7 @@ package io.seqera.events.infra.sql.providers
 
 import groovy.transform.CompileStatic
 import groovy.yaml.YamlSlurper
-import io.seqera.events.infra.sql.SqlDatabaseMigrator
+import io.seqera.events.infra.sql.migrations.SqlDatabaseMigrator
 import io.seqera.events.utils.ConnectionProviderFactory
 
 @CompileStatic

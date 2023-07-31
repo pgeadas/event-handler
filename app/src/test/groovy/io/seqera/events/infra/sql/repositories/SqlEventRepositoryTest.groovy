@@ -1,10 +1,10 @@
-package io.seqera.events.infra.sql.daos
+package io.seqera.events.infra.sql.repositories
 
 import groovy.sql.Sql
 import groovy.yaml.YamlSlurper
 import io.seqera.events.domain.event.Event
 import io.seqera.events.domain.event.EventRepository
-import io.seqera.events.infra.sql.SqlDatabaseMigrator
+import io.seqera.events.infra.sql.migrations.SqlDatabaseMigrator
 import io.seqera.events.infra.sql.providers.SqlContextProvider
 import io.seqera.events.utils.ConnectionProviderFactory
 import org.junit.jupiter.api.AfterAll

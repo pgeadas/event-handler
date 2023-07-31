@@ -5,12 +5,13 @@ import groovy.yaml.YamlSlurper
 import io.seqera.events.application.handlers.EventHandler
 import io.seqera.events.application.handlers.base.Handler
 import io.seqera.events.domain.event.EventRepository
-import io.seqera.events.infra.sql.SqlDatabaseMigrator
-import io.seqera.events.infra.sql.daos.SqlEventRepository
+import io.seqera.events.infra.sql.migrations.SqlDatabaseMigrator
+import io.seqera.events.infra.sql.repositories.SqlEventRepository
 import io.seqera.events.infra.sql.providers.SqlContextProvider
 import io.seqera.events.usecases.FindEventsUseCase
 import io.seqera.events.usecases.SaveEventUseCase
 import io.seqera.events.utils.ConnectionProviderFactory
+import io.seqera.events.utils.QueryParamParser
 
 class App {
 
@@ -34,9 +35,9 @@ class App {
         SaveEventUseCase saveEventUseCase = new SaveEventUseCase(dao)
 
         def props = loadPropertiesFile(PROPERTIES_FILENAME)
-        println "Reading config: " + props
+        println "Reading config: $props"
 
-        Handler[] handlers = [new EventHandler(findEventsUseCase, saveEventUseCase, props)]
+        Handler[] handlers = [new EventHandler(findEventsUseCase, saveEventUseCase, props, new QueryParamParser())]
         def httpServer = startServer(handlers)
 
         Runtime.getRuntime().addShutdownHook(new Thread() {

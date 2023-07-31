@@ -1,4 +1,4 @@
-package io.seqera.events.infra.sql.daos
+package io.seqera.events.infra.sql.repositories
 
 import groovy.sql.Sql
 import groovy.transform.CompileStatic
@@ -29,11 +29,11 @@ class SqlEventRepository implements EventRepository {
     SqlEventRepository(Sql sql, String tableName) {
         this.sql = sql
         this.tableName = tableName
-        def query = buildQueryWithoutOrdering()
+        String query = buildQueryWithoutOrdering()
         this.retrievePageWithoutOrderBy = sql.getConnection().prepareStatement(query)
     }
 
-    private GString buildQueryWithoutOrdering() {
+    private String buildQueryWithoutOrdering() {
         return """${SELECT} ${tableName} 
                   where id >= ?
                   limit ?
@@ -51,7 +51,9 @@ class SqlEventRepository implements EventRepository {
 
     @Override
     List<Event> retrievePage(PageDetails pageDetails, @Nullable Ordering ordering) {
-        validateArguments(pageDetails, ordering, Event.&isFieldNameValid)
+        if (!validateArguments(pageDetails, ordering, Event.&isFieldNameValid)) {
+            return []
+        }
         if (ordering) {
             return retrievePageWithOrdering(pageDetails, ordering)
         } else {
@@ -102,6 +104,5 @@ class SqlEventRepository implements EventRepository {
                 resultSet.getLong('io')
         )
     }
-
 
 }

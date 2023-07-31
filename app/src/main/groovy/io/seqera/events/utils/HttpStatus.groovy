@@ -11,4 +11,13 @@ enum HttpStatus {
     HttpStatus(int code) {
         this.code = code
     }
+
+    static HttpStatus fromCode(int code) {
+        for (HttpStatus status : values()) {
+            if (status.code == code) {
+                return status
+            }
+        }
+        return null
+    }
 }
