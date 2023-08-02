@@ -24,45 +24,25 @@ import spock.lang.Unroll
 class EventHandlerIntegrationSpec extends Specification {
 
     @Shared
-    private static HttpServer httpServer
+    private  HttpServer httpServer
     @Shared
-    private static int serverPort = 8080
+    private  int serverPort = 8083
     @Shared
-    private static boolean SERVER_STARTED = false
+    private  EventRepository repository = new InMemoryEventRepository([])
     @Shared
-    private static EventRepository repository = new InMemoryEventRepository([])
-    @Shared
-    private static FindEventsUseCase findEventsUseCase = new FindEventsUseCase(repository)
-    @Shared
-    private static Properties properties = new Properties()
-
-    // Ensure that we only instantiate one server
-    static {
-        if (!SERVER_STARTED) {
-            EventHandler handler = new EventHandler(findEventsUseCase, new SaveEventUseCase(repository), properties, new QueryParamParser())
-            httpServer = HttpServer.create(new InetSocketAddress(serverPort), 0).with {
-                createContext(handler.handlerPath, handler)
-                start()
-            }
-            SERVER_STARTED = true
-        }
-    }
+    private  Properties properties = new Properties()
 
     def setupSpec() {
-        // Configure RestAssured to use the HTTP server
+        EventHandler handler = new EventHandler(new FindEventsUseCase(repository), new SaveEventUseCase(repository), properties, new QueryParamParser())
+        httpServer = HttpServer.create(new InetSocketAddress(serverPort), 0).with {
+            createContext(handler.handlerPath, handler)
+            start()
+        }
         RestAssured.baseURI = "http://localhost"
         RestAssured.port = serverPort
         saveEventsInRepositoryWithDifferentUserIds(3)
     }
 
-    def cleanupSpec() {
-        try {
-            httpServer.stop(0)
-        } catch (ignored) {
-        }
-
-    }
-    
     def "test GET request handled in EventHandler"() {
         when:
         def response = RestAssured.get("/events?pageNumber=1&itemCount=10&orderby=id&asc=true")
@@ -71,10 +51,9 @@ class EventHandlerIntegrationSpec extends Specification {
         then:
         response.statusCode() == HttpStatus.Ok.code
         response.contentType() == ContentType.JSON.toString()
-        List<String> events = JsonPath.from(body).getList('')
+        List<String> events = JsonPath.from(body).getList('data')
         events.size() == 3
     }
-
 
     @Unroll
     def """given a GET request
@@ -86,7 +65,7 @@ class EventHandlerIntegrationSpec extends Specification {
 
         then:
         response.statusCode == statusCode
-        List<Event> events = JsonPath.from(body).getList('')
+        List<Event> events = JsonPath.from(body).getList('data')
         events.size() == 3
         events.stream().mapToInt { it."$orderBy" as int }.collect() == expected
 

@@ -42,10 +42,10 @@ class JsonHandlerTest extends Specification {
         given:
         HttpExchange httpExchange = new TestHttpExchange()
         def obj = [orderBy: 'id', itemCount: 30]
-        def response = JsonOutput.toJson(obj)
+        def response = JsonOutput.toJson(["data": obj])
 
         when:
-        JsonHandler.sendResponse(httpExchange, obj, 200)
+        JsonHandler.sendOkResponse(httpExchange, obj, 200)
 
         then:
         httpExchange.responseHeaders.getFirst("Content-type") == "application/json"
