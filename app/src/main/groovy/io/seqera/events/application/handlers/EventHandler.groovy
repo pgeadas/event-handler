@@ -60,7 +60,7 @@ class EventHandler extends JsonHandler {
         def query = getQueryString(http)
         if (!query) {
             println queryParamValidator.missingParamsMessageOrDefault("pageNumber/itemCount")
-            sendResponse(http, queryParamValidator.missingParamsMessageOrDefault("pageNumber/itemCount"), HttpStatus.BadRequest.code)
+            sendErrorResponse(http, queryParamValidator.missingParamsMessageOrDefault("pageNumber/itemCount"), HttpStatus.BadRequest.code)
             return
         }
 
@@ -68,55 +68,47 @@ class EventHandler extends JsonHandler {
 
         if (!queryParamValidator.hasPageNumberAndItemCount(queryParams)) {
             println queryParamValidator.missingParamsMessageOrDefault("pageNumber/itemCount")
-            sendResponse(http, queryParamValidator.missingParamsMessageOrDefault("pageNumber/itemCount"), HttpStatus.BadRequest.code)
+            sendErrorResponse(http, queryParamValidator.missingParamsMessageOrDefault("pageNumber/itemCount"), HttpStatus.BadRequest.code)
             return
         }
 
         Long pageNumber = queryParamValidator.validatePageNumber(queryParams)
         if (!pageNumber) {
             println queryParamValidator.invalidParamsMessageOrDefault("pageNumber")
-            sendResponse(http, queryParamValidator.invalidParamsMessageOrDefault("pageNumber"), HttpStatus.BadRequest.code)
+            sendErrorResponse(http, queryParamValidator.invalidParamsMessageOrDefault("pageNumber"), HttpStatus.BadRequest.code)
             return
         }
 
         Integer itemCount = queryParamValidator.validateItemCount(queryParams)
         if (!itemCount) {
             println queryParamValidator.invalidParamsMessageOrDefault("itemCount")
-            sendResponse(http, queryParamValidator.invalidParamsMessageOrDefault("itemCount"), HttpStatus.BadRequest.code)
+            sendErrorResponse(http, queryParamValidator.invalidParamsMessageOrDefault("itemCount"), HttpStatus.BadRequest.code)
             return
         }
 
         PageDetails pageDetails = queryParamValidator.validatePageDetails(pageNumber, itemCount)
         if (!pageDetails) {
             println queryParamValidator.invalidParamsMessageOrDefault("pageNumber/itemCount")
-            sendResponse(http, queryParamValidator.invalidParamsMessageOrDefault("pageNumber/itemCount"), HttpStatus.BadRequest.code)
+            sendErrorResponse(http, queryParamValidator.invalidParamsMessageOrDefault("pageNumber/itemCount"), HttpStatus.BadRequest.code)
             return
         }
 
         Ordering ordering = queryParamValidator.validateOrdering(queryParams, properties)
         if (!ordering) {
             println queryParamValidator.invalidParamsMessageOrDefault("orderBy/asc")
-            sendResponse(http, queryParamValidator.invalidParamsMessageOrDefault("orderBy/asc"), HttpStatus.BadRequest.code)
+            sendErrorResponse(http, queryParamValidator.invalidParamsMessageOrDefault("orderBy/asc"), HttpStatus.BadRequest.code)
             return
         }
 
         def events = retrievePage(pageDetails, ordering)
         if (events != null) {
             println "Ok ($pageDetails, $ordering) -> events=$events"
-            sendResponse(http, events, HttpStatus.Ok.code)
+            sendOkResponse(http, events, HttpStatus.Ok.code)
         } else {
             println queryParamValidator.internalServerErrorMessageOrDefault()
-            sendResponse(http, queryParamValidator.internalServerErrorMessageOrDefault(), HttpStatus.InternalServerError.code)
+            sendErrorResponse(http, queryParamValidator.internalServerErrorMessageOrDefault(), HttpStatus.InternalServerError.code)
         }
 
-    }
-
-    private static String getQueryString(HttpExchange http) {
-        return http.requestURI.query
-    }
-
-    private static String getRequestBody(HttpExchange http) {
-        return http.requestBody.text
     }
 
     private List<Event> retrievePage(PageDetails pageDetails, Ordering ordering) {
@@ -133,7 +125,7 @@ class EventHandler extends JsonHandler {
         def event = parseText(body) as Event
         if (!event) {
             println "Error parsing body: $body"
-            sendResponse(
+            sendOkResponse(
                     http,
                     queryParamValidator.invalidBodyMessageOrDefault(),
                     HttpStatus.BadRequest.code
@@ -142,15 +134,23 @@ class EventHandler extends JsonHandler {
         }
         try {
             event = saveEventUseCase.save(event)
-            sendResponse(http, event, HttpStatus.Ok.code)
+            sendOkResponse(http, event, HttpStatus.Ok.code)
         } catch (RuntimeException ex) {
             println "Error saving event: $ex.stackTrace"
-            sendResponse(
+            sendOkResponse(
                     http,
                     queryParamValidator.internalServerErrorMessageOrDefault(),
                     HttpStatus.InternalServerError.code
             )
         }
+    }
+
+    private static String getQueryString(HttpExchange http) {
+        return http.requestURI.query
+    }
+
+    private static String getRequestBody(HttpExchange http) {
+        return http.requestBody.text
     }
 
     @CompileStatic
