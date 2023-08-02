@@ -18,7 +18,7 @@ class Event {
         return new Event(id: id, workspaceId: workspaceId, userId: userId, mem: mem, cpu: cpu, io: io)
     }
 
-    // TODO: try to use something like Object value1 = event1."$fieldToCompare"? What is more performant?
+    // try to use something like Object value1 = event1."$fieldToCompare"? What is more performant?
     static boolean isFieldNameValid(String fieldName) {
         return VALID_FIELD_NAMES.any { it == fieldName }
     }

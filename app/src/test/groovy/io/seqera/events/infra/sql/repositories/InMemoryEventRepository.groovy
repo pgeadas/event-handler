@@ -70,20 +70,12 @@ class EventComparator implements Comparator<Event> {
         Object value1 = event1."$fieldToCompare"
         Object value2 = event2."$fieldToCompare"
 
-        if (value1 == null && value2 == null) {
-            return 0
-        } else if (value1 == null) {
-            return -1
-        } else if (value2 == null) {
-            return 1
+        def compareResult = value1 <=> value2
+
+        if (compareResult == 0) {
+            return event1 <=> event2
         }
 
-        if (value1 < value2) {
-            return -1
-        } else if (value1 > value2) {
-            return 1
-        } else {
-            return 0
-        }
+        return compareResult
     }
 }

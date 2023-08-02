@@ -11,16 +11,6 @@ import io.seqera.events.usecases.SaveEventUseCase
 import io.seqera.events.utils.HttpStatus
 import io.seqera.events.utils.QueryParamParser
 
-// TODO: list of improvements
-// 0: support for multiple columns in orderBy. Add and clause to select
-// 1: add Logger instead of print
-// 2: add async processing of requests (queue)
-// 3: open api specs
-// 4: Flyway for automatic migrations
-// 5: add a wrapper for response data
-// 6: tests for the properties and defaults
-// 7: use sort=asc and desc
-
 @CompileStatic
 class EventHandler extends JsonHandler {
 
@@ -58,6 +48,7 @@ class EventHandler extends JsonHandler {
 
     void handleGet(HttpExchange http) {
         def query = getQueryString(http)
+        println "query: $query"
         if (!query) {
             println queryParamValidator.missingParamsMessageOrDefault("pageNumber/itemCount")
             sendErrorResponse(http, queryParamValidator.missingParamsMessageOrDefault("pageNumber/itemCount"), HttpStatus.BadRequest.code)
