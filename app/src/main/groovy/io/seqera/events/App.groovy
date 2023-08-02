@@ -6,12 +6,23 @@ import io.seqera.events.application.handlers.EventHandler
 import io.seqera.events.application.handlers.base.Handler
 import io.seqera.events.domain.event.EventRepository
 import io.seqera.events.infra.sql.migrations.SqlDatabaseMigrator
-import io.seqera.events.infra.sql.repositories.SqlEventRepository
 import io.seqera.events.infra.sql.providers.SqlContextProvider
+import io.seqera.events.infra.sql.repositories.SqlEventRepository
 import io.seqera.events.usecases.FindEventsUseCase
 import io.seqera.events.usecases.SaveEventUseCase
 import io.seqera.events.utils.ConnectionProviderFactory
 import io.seqera.events.utils.QueryParamParser
+
+// TODO: list of improvements (not all related with pagination)
+// 0: support for multiple columns in orderBy!
+// 1: add Logger instead of print
+// 2: add async processing of requests (queue)
+// 3: open api specs
+// 4: Flyway for automatic migrations
+// 5: add a wrapper class for response data
+// 6: tests for the properties and defaults
+// 7: use sort=asc and desc instead of boolean
+// 8: fix reading properties from resource from a jar
 
 class App {
 
