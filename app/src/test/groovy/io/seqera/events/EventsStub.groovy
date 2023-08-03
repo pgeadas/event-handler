@@ -9,30 +9,19 @@ class EventsStub {
     public static final String ID = "id"
     public static final String WORKSPACE_ID = "workspaceId"
     public static final String USER_ID = "userId"
-    public static final long MEM = 20
-    public static final long CPU = 30
-    public static final int IO = 40
+    public static final long MEM = 10
+    public static final long CPU = 10
+    public static final int IO = 10
 
-    static List<Event> createEventsStringClosure(int count, Closure<Event> eventCreationClosure) {
+    static List<Event> eventsList(int count) {
         List<Event> events = []
-        for (c in 0..<count) {
-            events << eventCreationClosure(c as String)
-        }
-        return events
-    }
-
-    static List<Event> createEventsIntClosure(int count, Closure<Event> eventCreationClosure) {
-        List<Event> events = []
-        for (c in 0..<count) {
-            events << eventCreationClosure(c)
-        }
-        return events
-    }
-
-    static List<Event> createEvents(int count, Closure<Event> eventCreationClosure) {
-        List<Event> events = []
-        for (c in 0..<count) {
-            events << eventCreationClosure()
+        for (i in 1..count) {
+            events << Event.of(
+                    "$WORKSPACE_ID${i}",
+                    "$USER_ID${i}",
+                    MEM * i,
+                    CPU * i,
+                    IO * i)
         }
         return events
     }
@@ -44,28 +33,6 @@ class EventsStub {
                 USER_ID,
                 MEM,
                 CPU,
-                IO
-        )
-    }
-
-    static Event withUserId(String userId) {
-        return Event.of(
-                null,
-                WORKSPACE_ID,
-                userId,
-                MEM,
-                CPU,
-                IO
-        )
-    }
-
-    static Event withCpu(int cpu) {
-        return Event.of(
-                null,
-                WORKSPACE_ID,
-                USER_ID,
-                MEM,
-                cpu,
                 IO
         )
     }
@@ -95,6 +62,5 @@ class EventsStub {
                 IO
         )
     }
-
 
 }

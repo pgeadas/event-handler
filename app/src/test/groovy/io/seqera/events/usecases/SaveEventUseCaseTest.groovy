@@ -17,20 +17,20 @@ import static org.mockito.Mockito.*
 class SaveEventUseCaseTest {
 
     private SaveEventUseCase useCase
-    private EventRepository eventDao
+    private EventRepository repository
 
     @BeforeEach
     void setUp() {
-        eventDao = mock(EventRepository.class)
-        useCase = new SaveEventUseCase(eventDao)
+        repository = mock(EventRepository.class)
+        useCase = new SaveEventUseCase(repository)
     }
 
     @ParameterizedTest
     @ArgumentsSource(EventsArgumentSource.class)
     void "Should save a given Event"(Event event) {
         useCase.save(event)
-        verify(eventDao).save(event)
-        verifyNoMoreInteractions(eventDao)
+        verify(repository).save(event)
+        verifyNoMoreInteractions(repository)
     }
 
     static class EventsArgumentSource implements ArgumentsProvider {

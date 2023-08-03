@@ -14,7 +14,7 @@ class SqlEventRepositoryTest extends EventRepositoryContractTest {
 
     private static final String CONFIG_NAME = 'app-test.yaml'
     private static final String TABLE_NAME = "EVENT"
-    private EventRepository eventDao
+    private EventRepository repository
     private Sql connection
 
     SqlEventRepositoryTest() {
@@ -26,7 +26,7 @@ class SqlEventRepositoryTest extends EventRepositoryContractTest {
         )
         def connectionProvider = contextProvider.buildContext()
         connection = connectionProvider.getConnection()
-        eventDao = new SqlEventRepository(connection, TABLE_NAME)
+        repository = new SqlEventRepository(connection, TABLE_NAME)
     }
 
     @AfterEach
@@ -49,6 +49,6 @@ class SqlEventRepositoryTest extends EventRepositoryContractTest {
                               values ('$event.workspaceId','$event.userId',$event.cpu,$event.mem,$event.io)"""
             connection.executeInsert(query)[0][0] as Long
         }
-        return eventDao
+        return repository
     }
 }

@@ -43,7 +43,6 @@ class EventHandlerIntegrationWithMockedRepoTest {
         }
         RestAssured.baseURI = "http://localhost"
         RestAssured.port = serverPort
-        saveEventsInRepositoryWithDifferentUserIds(3)
     }
 
     @AfterAll
@@ -59,7 +58,7 @@ class EventHandlerIntegrationWithMockedRepoTest {
          when doing valid GET request
          then should answer with OK and the results"""() {
 
-        def result = EventsStub.createEvents(3, EventsStub.&full)
+        def result = EventsStub.eventsList(3)
         when(repository.retrievePage(any(), any())).thenReturn(result)
 
         def response = RestAssured.get("/events?pageNumber=1&itemCount=10&orderby=id&asc=true")
@@ -120,10 +119,6 @@ class EventHandlerIntegrationWithMockedRepoTest {
         Assertions.assertEquals(ContentType.JSON.toString(), response.contentType())
         String error = JsonPath.from(body).getString('error')
         Assertions.assertNotNull(error)
-    }
-
-    private saveEventsInRepositoryWithDifferentUserIds(int amount) {
-        EventsStub.createEventsStringClosure(amount, EventsStub.&withUserId).forEach { repository.save(it) }
     }
 
 }

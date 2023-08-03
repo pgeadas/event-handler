@@ -11,12 +11,12 @@ import static org.mockito.Mockito.*
 class FindEventsUseCaseTest {
 
     private FindEventsUseCase useCase
-    private EventRepository eventDao
+    private EventRepository repository
 
     @BeforeEach
     void setUp() {
-        eventDao = mock(EventRepository.class)
-        useCase = new FindEventsUseCase(eventDao)
+        repository = mock(EventRepository.class)
+        useCase = new FindEventsUseCase(repository)
     }
 
     @Test
@@ -25,8 +25,8 @@ class FindEventsUseCaseTest {
         PageDetails details = PageDetails.of(1, 1)
         Ordering ordering = Ordering.of("id", true)
         useCase.retrievePage(details, ordering)
-        verify(eventDao).retrievePage(details, ordering)
-        verifyNoMoreInteractions(eventDao)
+        verify(repository).retrievePage(details, ordering)
+        verifyNoMoreInteractions(repository)
     }
 
     @Test
@@ -35,7 +35,7 @@ class FindEventsUseCaseTest {
         PageDetails details = PageDetails.of(1, 1)
         Ordering ordering = null
         useCase.retrievePage(details, ordering)
-        verify(eventDao).retrievePage(details, ordering)
-        verifyNoMoreInteractions(eventDao)
+        verify(repository).retrievePage(details, ordering)
+        verifyNoMoreInteractions(repository)
     }
 }

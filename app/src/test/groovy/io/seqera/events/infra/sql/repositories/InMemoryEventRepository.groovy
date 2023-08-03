@@ -8,7 +8,7 @@ import io.seqera.events.domain.pagination.Ordering
 import io.seqera.events.domain.pagination.PageDetails
 
 /** The purpose of the InMemoryEventRepository is just to exemplify how we could easily swap between different Adapters
- * and how we do not need to modify or create new tests by simply testing the dao (repository) contract.
+ * and how we do not need to modify or create new tests by simply testing the repository contract.
  * From UnitTests it is often preferred to use a fake database like this one, so the contract testing ensures that
  * all implementations show the same behaviour **/
 @CompileStatic
@@ -70,12 +70,9 @@ class EventComparator implements Comparator<Event> {
         Object value1 = event1."$fieldToCompare"
         Object value2 = event2."$fieldToCompare"
 
-        def compareResult = value1 <=> value2
-
-        if (compareResult == 0) {
-            return event1 <=> event2
-        }
-
-        return compareResult
+        return value1 == null && value2 == null ? 0
+                : value1 == null ? -1
+                : value2 == null ? 1
+                : value1 <=> value2
     }
 }

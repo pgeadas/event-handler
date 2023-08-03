@@ -40,10 +40,10 @@ class App {
         def connectionProvider = contextProvider.buildContext()
         def connection = connectionProvider.getConnection()
 
-        EventRepository dao = new SqlEventRepository(connection, EVENT)
+        EventRepository repository = new SqlEventRepository(connection, EVENT)
 
-        FindEventsUseCase findEventsUseCase = new FindEventsUseCase(dao)
-        SaveEventUseCase saveEventUseCase = new SaveEventUseCase(dao)
+        FindEventsUseCase findEventsUseCase = new FindEventsUseCase(repository)
+        SaveEventUseCase saveEventUseCase = new SaveEventUseCase(repository)
 
         def props = loadPropertiesFile(PROPERTIES_FILENAME)
         println "Reading config: $props"

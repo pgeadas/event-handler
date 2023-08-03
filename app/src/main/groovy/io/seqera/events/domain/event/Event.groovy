@@ -18,6 +18,10 @@ class Event {
         return new Event(id: id, workspaceId: workspaceId, userId: userId, mem: mem, cpu: cpu, io: io)
     }
 
+    static Event of(String workspaceId, String userId, Long mem, Long cpu, Long io) {
+        return new Event(workspaceId: workspaceId, userId: userId, mem: mem, cpu: cpu, io: io)
+    }
+
     // try to use something like Object value1 = event1."$fieldToCompare"? What is more performant?
     static boolean isFieldNameValid(String fieldName) {
         return VALID_FIELD_NAMES.any { it == fieldName }
