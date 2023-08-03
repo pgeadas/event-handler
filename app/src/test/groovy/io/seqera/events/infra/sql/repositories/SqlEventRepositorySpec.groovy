@@ -7,17 +7,17 @@ import io.seqera.events.domain.event.EventRepository
 import io.seqera.events.infra.sql.migrations.SqlDatabaseMigrator
 import io.seqera.events.infra.sql.providers.SqlContextProvider
 import io.seqera.events.utils.ConnectionProviderFactory
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
+import spock.lang.Shared
 
-class SqlEventRepositoryTest extends EventRepositoryContractTest {
-
+class SqlEventRepositorySpec extends EventRepositoryContractSpec {
     private static final String CONFIG_NAME = 'app-test.yaml'
     private static final String TABLE_NAME = "EVENT"
+    @Shared
     private EventRepository repository
+    @Shared
     private Sql connection
 
-    SqlEventRepositoryTest() {
+    def setupSpec() {
         SqlContextProvider contextProvider = new SqlContextProvider(
                 CONFIG_NAME,
                 new ConnectionProviderFactory(),
@@ -29,16 +29,15 @@ class SqlEventRepositoryTest extends EventRepositoryContractTest {
         repository = new SqlEventRepository(connection, TABLE_NAME)
     }
 
-    @AfterEach
-    void tearDown() {
+    def cleanup() {
         String query = "TRUNCATE TABLE ${TABLE_NAME}"
         connection.execute(query)
         query = "ALTER TABLE ${TABLE_NAME} ALTER COLUMN id RESTART WITH 0"
         connection.execute(query)
     }
 
-    @AfterAll
-    void afterAll() {
+
+    void cleanupSpec() {
         connection.close()
     }
 

@@ -1,6 +1,6 @@
 package io.seqera.events.infra.sql.repositories
 
-import groovy.transform.CompileStatic
+
 import io.seqera.events.domain.event.Event
 import io.seqera.events.domain.event.EventRepository
 import io.seqera.events.domain.pagination.Ordering
@@ -10,7 +10,6 @@ import io.seqera.events.domain.pagination.PageDetails
  * and how we do not need to modify or create new tests by simply testing the repository contract.
  * From UnitTests it is often preferred to use a fake database like this one, so the contract testing ensures that
  * all implementations show the same behaviour **/
-@CompileStatic
 class InMemoryEventRepository implements EventRepository {
 
     private List<Event> eventList
@@ -33,14 +32,10 @@ class InMemoryEventRepository implements EventRepository {
         }
 
         if (!orderings.isEmpty()) {
-            if (orderings[0].isAscending) {
-                eventList.sort(new EventComparator(orderings[0].orderBy))
-            } else {
-                eventList.sort(new EventComparator(orderings[0].orderBy).reversed())
-            }
+            eventList.sort(new EventComparator(orderings))
         }
 
-        int to = (pageDetails.itemCount > eventList.size() ? eventList.size() : pageDetails.itemCount) as int
+        int to = calculateMaxToValue(pageDetails) as int
         int from = pageDetails.rangeStart() as int
 
         if (from > to) {
@@ -50,23 +45,33 @@ class InMemoryEventRepository implements EventRepository {
         return eventList.subList(from, to)
     }
 
+    private int calculateMaxToValue(PageDetails pageDetails) {
+        return pageDetails.itemCount > eventList.size() ? eventList.size() : pageDetails.itemCount
+    }
+
 }
 
 class EventComparator implements Comparator<Event> {
-    private String fieldToCompare
+    private List<Ordering> orderings
 
-    EventComparator(String fieldToCompare) {
-        this.fieldToCompare = fieldToCompare
+    EventComparator(List<Ordering> orderings) {
+        this.orderings = orderings
     }
 
     @Override
     int compare(Event event1, Event event2) {
-        Object value1 = event1."$fieldToCompare"
-        Object value2 = event2."$fieldToCompare"
-
-        return value1 == null && value2 == null ? 0
-                : value1 == null ? -1
-                : value2 == null ? 1
-                : value1 <=> value2
+        int matches = 0
+        for (Ordering ord in orderings) {
+            if (ord.sortOrder() == 'asc') {
+                matches = event1[ord.orderBy] <=> event2[ord.orderBy]
+            } else {
+                matches = event2[ord.orderBy] <=> event1[ord.orderBy]
+            }
+            if (matches != 0) {
+                break
+            }
+        }
+        return matches
     }
+
 }

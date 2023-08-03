@@ -19,9 +19,9 @@ class EventsStub {
             events << Event.of(
                     "$WORKSPACE_ID${i}",
                     "$USER_ID${i}",
-                    MEM * i,
+                    MEM - i,
                     CPU * i,
-                    IO * i)
+                    IO)
         }
         return events
     }

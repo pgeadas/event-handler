@@ -23,13 +23,15 @@ class PaginationSpec extends Specification {
         result == expected
 
         where:
-        details              | orderBy                  | validator                     | expected
-        PageDetails.of(1, 1) | []                       | null                          | true
-        PageDetails.of(1, 1) | []                       | { it -> it in ['id', 'mem'] } | true
-        PageDetails.of(1, 1) | [Ordering.of('id')]      | null                          | false
-        PageDetails.of(1, 1) | [Ordering.of('invalid')] | { it -> it in ['id', 'mem'] } | false
-        PageDetails.of(1, 1) | [Ordering.of('id')]      | { it -> it in ['id', 'mem'] } | true
-        PageDetails.of(1, 1) | [Ordering.of('mem')]     | { it -> it in ['id', 'mem'] } | true
+        details              | orderBy                                 | validator                     | expected
+        PageDetails.of(1, 1) | []                                      | null                          | true
+        PageDetails.of(1, 1) | []                                      | { it -> it in ['id', 'mem'] } | true
+        PageDetails.of(1, 1) | [Ordering.of('id')]                     | null                          | false
+        PageDetails.of(1, 1) | [Ordering.of('io')]                     | { it -> it in ['id', 'mem'] } | false
+        PageDetails.of(1, 1) | [Ordering.of('id')]                     | { it -> it in ['id', 'mem'] } | true
+        PageDetails.of(1, 1) | [Ordering.of('mem')]                    | { it -> it in ['id', 'mem'] } | true
+        PageDetails.of(1, 1) | [Ordering.of('id'), Ordering.of('mem')] | { it -> it in ['id', 'mem'] } | true
+        PageDetails.of(1, 1) | [Ordering.of('mem'), Ordering.of('io')] | { it -> it in ['id', 'mem'] } | false
     }
 
 }
