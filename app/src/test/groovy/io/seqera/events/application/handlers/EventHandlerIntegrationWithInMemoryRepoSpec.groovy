@@ -29,14 +29,19 @@ class EventHandlerIntegrationWithInMemoryRepoSpec extends Specification {
     private Properties properties = new Properties()
 
     def setupSpec() {
-        EventHandler handler = new EventHandler(new FindEventsUseCase(repository), new SaveEventUseCase(repository), properties, new QueryParamParser())
+        EventsStub.eventsList(3).forEach { repository.save(it) }
+
+        EventHandler handler = new EventHandler(
+                new FindEventsUseCase(repository),
+                new SaveEventUseCase(repository),
+                properties, new QueryParamParser()
+        )
         httpServer = HttpServer.create(new InetSocketAddress(serverPort), 0).with {
             createContext(handler.handlerPath, handler)
             start()
         }
         RestAssured.baseURI = "http://localhost"
         RestAssured.port = serverPort
-        saveEventsInRepositoryWithDifferentUserIds(3)
     }
 
     def "test GET request handled in EventHandler"() {
@@ -63,15 +68,14 @@ class EventHandlerIntegrationWithInMemoryRepoSpec extends Specification {
         response.statusCode == statusCode
         List<Event> events = JsonPath.from(body).getList('data')
         events.size() == 3
-        events.stream().mapToInt { it."$orderBy" as int }.collect() == expectedOrder
+        events.stream().collect { it."$orderBy" } == expectedOrder
 
         where:
-        orderBy  | isAsc | expectedOrder | statusCode
-        "id"     | true  | [0, 1, 2]     | HttpStatus.Ok.code
-        "id"     | false | [2, 1, 0]     | HttpStatus.Ok.code
-        "userId" | true  | [0, 1, 2]     | HttpStatus.Ok.code
-        "userId" | false | [2, 1, 0]     | HttpStatus.Ok.code
-
+        orderBy  | isAsc | expectedOrder                     | statusCode
+        "id"     | true  | ["0", "1", "2"]                   | HttpStatus.Ok.code
+        "id"     | false | ["2", "1", "0"]                   | HttpStatus.Ok.code
+        "userId" | true  | ["userId1", "userId2", "userId3"] | HttpStatus.Ok.code
+        "userId" | false | ["userId3", "userId2", "userId1"] | HttpStatus.Ok.code
     }
 
     @Unroll
@@ -133,10 +137,6 @@ class EventHandlerIntegrationWithInMemoryRepoSpec extends Specification {
         "pageNumber=1"       | "itemCount=invalid" | HttpStatus.BadRequest.code | "Invalid params: itemCount"
         " "                  | "itemCount=1"       | HttpStatus.BadRequest.code | "Missing params: pageNumber/itemCount"
         "pageNumber=1"       | " "                 | HttpStatus.BadRequest.code | "Missing params: pageNumber/itemCount"
-    }
-
-    private saveEventsInRepositoryWithDifferentUserIds(int amount) {
-        EventsStub.createEventsStringClosure(amount, EventsStub.&withUserId).forEach { repository.save(it) }
     }
 
 }

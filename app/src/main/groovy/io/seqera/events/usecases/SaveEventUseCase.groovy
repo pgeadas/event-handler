@@ -5,13 +5,13 @@ import io.seqera.events.domain.event.EventRepository
 
 class SaveEventUseCase {
 
-    private final EventRepository eventDao
+    private final EventRepository repository
 
-    SaveEventUseCase(EventRepository eventDao) {
-        this.eventDao = eventDao
+    SaveEventUseCase(EventRepository repository) {
+        this.repository = repository
     }
 
     Event save(Event event) {
-        return eventDao.save(event)
+        return repository.save(event)
     }
 }

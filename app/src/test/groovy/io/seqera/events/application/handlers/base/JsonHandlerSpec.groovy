@@ -12,15 +12,15 @@ class JsonHandlerTest extends Specification {
     private FakeJsonHandler handler
 
     def setup() {
-        handler = new FakeJsonHandler()
+        handler = new FakeJsonHandler("/fakePath")
     }
 
-    def "getHandlerPath should return not null"() {
+    def "getHandlerPath should return the defined path"() {
         when:
         String path = handler.getHandlerPath()
 
         then:
-        path != null
+        path == "/fakePath"
     }
 
 
@@ -51,7 +51,6 @@ class JsonHandlerTest extends Specification {
         httpExchange.responseHeaders.getFirst("Content-type") == "application/json"
         httpExchange.getResponseCode() == 200
         httpExchange.getResponseLength() == response.getBytes("UTF-8").length
-        httpExchange.responseBody != null
         httpExchange.responseBody.toString() == response
     }
 
@@ -155,8 +154,11 @@ class JsonHandlerTest extends Specification {
     }
 
     private static class FakeJsonHandler extends JsonHandler {
-        FakeJsonHandler() {
+        String handlerPath
+
+        FakeJsonHandler(String handlerPath) {
             super()
+            this.handlerPath = handlerPath
         }
 
         @Override
@@ -165,7 +167,7 @@ class JsonHandlerTest extends Specification {
 
         @Override
         String getHandlerPath() {
-            return "/fakePath"
+            return handlerPath
         }
     }
 

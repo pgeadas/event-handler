@@ -106,7 +106,7 @@ class EventHandler extends JsonHandler {
         try {
             return findEventsUseCase.retrievePage(pageDetails, ordering)
         } catch (RuntimeException ex) {
-            println "Error fetching events: $ex.stackTrace"
+            println "${ex} - ${ex.stackTrace}"
             return null
         }
     }
@@ -179,9 +179,9 @@ class EventHandler extends JsonHandler {
         private int parseMaxItemCountFromProperties() {
             try {
                 return properties.getProperty(MAX_ITEM_COUNT) as int
-            } catch (RuntimeException ex) {
-                println """Error parsing maxItemCount from properties: $ex.stackTrace.
-                        \nUsing default maxItemCount: $DEFAULT_MAX_ITEM_COUNT"""
+            } catch (RuntimeException ignored) {
+                println """Error parsing maxItemCount from properties:
+Using default maxItemCount: $DEFAULT_MAX_ITEM_COUNT"""
                 return DEFAULT_MAX_ITEM_COUNT
             }
         }

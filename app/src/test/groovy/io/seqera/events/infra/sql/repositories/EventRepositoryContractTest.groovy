@@ -22,13 +22,13 @@ abstract class EventRepositoryContractTest {
             when less than itemCount events in database
             then should retrieve all"""() {
 
+        def eventCount = 3
         def details = PageDetails.of(1, 10)
         def ordering = null
-        def eventCount = 3
 
-        def dao = populateDB(EventsStub.createEvents(eventCount, EventsStub.&full))
+        def repository = populateDB(EventsStub.eventsList(eventCount))
 
-        def events = dao.retrievePage(details, ordering)
+        def events = repository.retrievePage(details, ordering)
 
         JUnit5Assertions.assertEquals(eventCount, events.size())
     }
@@ -38,13 +38,13 @@ abstract class EventRepositoryContractTest {
             when more than itemCount events in database
             then should retrieve only itemCount"""() {
 
+        def eventCount = 3
         def details = PageDetails.of(1, 2)
         def ordering = null
-        def eventCount = 3
 
-        def dao = populateDB(EventsStub.createEvents(eventCount, EventsStub.&full))
+        def repository = populateDB(EventsStub.eventsList(eventCount))
 
-        def events = dao.retrievePage(details, ordering)
+        def events = repository.retrievePage(details, ordering)
 
         JUnit5Assertions.assertEquals(details.itemCount, events.size())
     }
@@ -54,12 +54,13 @@ abstract class EventRepositoryContractTest {
             when pageNumber is higher than the number of events in database
             then should not retrieve events"""() {
 
+        int eventsCount = 1
         def details = PageDetails.of(2, 2)
         def ordering = null
 
-        def dao = populateDB(List.of(EventsStub.full()))
+        def repository = populateDB(EventsStub.eventsList(eventsCount))
 
-        def events = dao.retrievePage(details, ordering)
+        def events = repository.retrievePage(details, ordering)
 
         JUnit5Assertions.assertEquals(0, events.size())
     }
@@ -74,9 +75,9 @@ abstract class EventRepositoryContractTest {
         def details = PageDetails.of(1, 10)
         def ordering = null
 
-        def dao = populateDB(EventsStub.createEvents(eventCount, EventsStub.&withNullId))
+        def repository = populateDB(EventsStub.eventsList(eventCount))
 
-        def events = dao.retrievePage(details, ordering)
+        def events = repository.retrievePage(details, ordering)
 
         JUnit5Assertions.assertEquals(2, events.size())
         JUnit5Assertions.assertNotNull(events.get(0).id)
@@ -85,8 +86,8 @@ abstract class EventRepositoryContractTest {
 
     @ParameterizedTest
     @CsvSource([
-            'false, 2, 1, 0',
-            'true, 0, 1, 2',
+            'false, userId3, userId2, userId1',
+            'true, userId1, userId2, userId3',
     ])
     void """given database has events with userId
             when retrieved and order by userId ascending or descending
@@ -96,9 +97,9 @@ abstract class EventRepositoryContractTest {
         def details = PageDetails.of(1, eventCount)
         Ordering ordering = Ordering.of("userId", isAscending)
 
-        def dao = populateDB(EventsStub.createEventsStringClosure(eventCount, EventsStub.&withUserId))
+        def repository = populateDB(EventsStub.eventsList(eventCount))
 
-        def events = dao.retrievePage(details, ordering)
+        def events = repository.retrievePage(details, ordering)
 
         JUnit5Assertions.assertEquals(3, events.size())
         JUnit5Assertions.assertEquals(userId0, events.get(0).userId)
@@ -108,8 +109,8 @@ abstract class EventRepositoryContractTest {
 
     @ParameterizedTest
     @CsvSource([
-            'false, 2, 1, 0',
-            'true, 0, 1, 2',
+            'false, 30, 20, 10',
+            'true, 10, 20, 30',
     ])
     void """given database has events with cpu
             when retrieved and order by cpu ascending or descending
@@ -119,9 +120,9 @@ abstract class EventRepositoryContractTest {
         def details = PageDetails.of(1, eventCount)
         Ordering ordering = Ordering.of("cpu", isAscending)
 
-        def dao = populateDB(EventsStub.createEventsIntClosure(eventCount, EventsStub.&withCpu))
+        def repository = populateDB(EventsStub.eventsList(eventCount))
 
-        def events = dao.retrievePage(details, ordering)
+        def events = repository.retrievePage(details, ordering)
 
         JUnit5Assertions.assertEquals(3, events.size())
         JUnit5Assertions.assertEquals(cpu0, events.get(0).cpu)
@@ -138,9 +139,9 @@ abstract class EventRepositoryContractTest {
         def details = PageDetails.of(1, eventCount)
         Ordering ordering = null
 
-        def dao = populateDB(EventsStub.createEventsIntClosure(eventCount, EventsStub.&withCpu))
+        def repository = populateDB(EventsStub.eventsList(eventCount))
 
-        def events = dao.retrievePage(details, ordering)
+        def events = repository.retrievePage(details, ordering)
 
         JUnit5Assertions.assertEquals(3, events.size())
         def list = events.collect { it.id as int }
