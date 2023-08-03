@@ -17,6 +17,10 @@ class Ordering {
         return new Ordering(orderBy, isAscending)
     }
 
+    String sortOrder() {
+        return isAscending ? "asc" : "desc"
+    }
+
     boolean equals(o) {
         if (this.is(o)) return true
         if (o == null || getClass() != o.class) return false

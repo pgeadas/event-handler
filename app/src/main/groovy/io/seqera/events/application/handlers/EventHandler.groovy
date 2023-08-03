@@ -84,16 +84,16 @@ class EventHandler extends JsonHandler {
             return
         }
 
-        Ordering ordering = queryParamValidator.validateOrdering(queryParams, properties)
-        if (!ordering) {
+        List<Ordering> orderings = queryParamValidator.validateOrdering(queryParams, properties)
+        if (orderings == null) {
             println queryParamValidator.invalidParamsMessageOrDefault("orderBy/asc")
             sendErrorResponse(http, queryParamValidator.invalidParamsMessageOrDefault("orderBy/asc"), HttpStatus.BadRequest.code)
             return
         }
 
-        def events = retrievePage(pageDetails, ordering)
+        def events = retrievePage(pageDetails, orderings)
         if (events != null) {
-            println "Ok ($pageDetails, $ordering) -> events=$events"
+            println "Ok ($pageDetails, ${Arrays.toString(orderings)}) -> events=$events"
             sendOkResponse(http, events, HttpStatus.Ok.code)
         } else {
             println queryParamValidator.internalServerErrorMessageOrDefault()
@@ -102,9 +102,9 @@ class EventHandler extends JsonHandler {
 
     }
 
-    private List<Event> retrievePage(PageDetails pageDetails, Ordering ordering) {
+    private List<Event> retrievePage(PageDetails pageDetails, List<Ordering> orderings) {
         try {
-            return findEventsUseCase.retrievePage(pageDetails, ordering)
+            return findEventsUseCase.retrievePage(pageDetails, orderings)
         } catch (RuntimeException ex) {
             println "${ex} - ${ex.stackTrace}"
             return null
@@ -165,8 +165,8 @@ class EventHandler extends JsonHandler {
         private static final String ORDER_BY = 'request.get.defaults.orderBy'
         private static final String DEFAULT_ORDER_BY = null
 
-        private static final String ASCENDING = 'request.get.defaults.ascending'
-        private static final String DEFAULT_ASCENDING = 'true'
+        private static final String SORTING_ORDER = 'request.get.defaults.sorting.order'
+        private static final String DEFAULT_SORTING_ORDER = 'asc'
 
         private final Properties properties
         private final int maxItemCountParsed
@@ -208,6 +208,13 @@ Using default maxItemCount: $DEFAULT_MAX_ITEM_COUNT"""
             return orderBy != null && !Event.isFieldNameValid(orderBy)
         }
 
+        private static String validateSortingOrder(String orderBy) {
+            return orderBy == null || orderBy.isEmpty() ? "asc"
+                    : orderBy == 'asc' ? 'asc'
+                    : orderBy == 'desc' ? 'desc'
+                    : null
+        }
+
         private static Long validatePageNumber(Map<String, String> queryParams) {
             try {
                 return queryParams["pagenumber"] as Long
@@ -244,26 +251,63 @@ Using default maxItemCount: $DEFAULT_MAX_ITEM_COUNT"""
             return queryParams["pagenumber"] && queryParams["itemcount"]
         }
 
-        private static Ordering validateOrdering(Map<String, String> queryParams, Properties properties) {
-            String orderBy
+        private static List<Ordering> validateOrdering(Map<String, String> queryParams, Properties properties) {
             if (!queryParams["orderby"]) {
-                orderBy = properties.getProperty(ORDER_BY, DEFAULT_ORDER_BY)
-            } else {
-                orderBy = queryParams["orderby"]
+                return []
             }
-            if (isInvalidOrderBy(orderBy)) {
-                println "Error validating orderBy: found $orderBy"
+            String orderBy = queryParams["orderby"]
+
+            String sortingOrder
+            if (!queryParams["sort"]) {
+                sortingOrder = properties.getProperty(SORTING_ORDER, DEFAULT_SORTING_ORDER)
+            } else {
+                sortingOrder = queryParams["sort"]
+            }
+
+            try {
+                return validateOrderings(orderBy, sortingOrder, properties.getProperty(SORTING_ORDER, DEFAULT_SORTING_ORDER))
+            } catch (e) {
+                println e
                 return null
             }
+        }
 
-            boolean isAscending
-            if (!queryParams["asc"]) {
-                isAscending = Boolean.parseBoolean(properties.getProperty(ASCENDING, DEFAULT_ASCENDING))
-            } else {
-                isAscending = Boolean.parseBoolean(queryParams["asc"])
+        private static List<Ordering> validateOrderings(String orderBy, String sortingOrder, String sortingOrderDefault) {
+            List<String> splitOrderBy = orderBy.split(',').toList()
+            for (String ob : splitOrderBy) {
+                if (isInvalidOrderBy(ob)) {
+                    println "Error validating orderBy: found $ob"
+                    return null
+                }
             }
 
-            return Ordering.of(orderBy, isAscending)
+            List<String> sortingOrders = []
+            for (String so : sortingOrder.split(',')) {
+                def validatedSort = validateSortingOrder(so)
+                if (validatedSort) {
+                    sortingOrders << validatedSort
+                } else {
+                    println "Error validating sorting order: found $validatedSort"
+                    return null
+                }
+            }
+
+            List<Ordering> orderings = buildOrderings(splitOrderBy, sortingOrders, sortingOrderDefault)
+
+            return orderings
         }
+
+        private static List<Ordering> buildOrderings(List<String> splitOrderBy, List<String> sortingOrder, String sortingOrderDefault) {
+            List<Ordering> result = []
+            for (int i = 0; i < splitOrderBy.size(); i++) {
+                result << Ordering.of(splitOrderBy[i], getIsAscendingOrDefault(sortingOrder, i, sortingOrderDefault))
+            }
+            return result
+        }
+
+        private static boolean getIsAscendingOrDefault(List<String> sortingOrder, int index, String sortingOrderDefault) {
+            return index < sortingOrder.size() ? sortingOrder[index] == 'asc' : sortingOrderDefault
+        }
+
     }
 }

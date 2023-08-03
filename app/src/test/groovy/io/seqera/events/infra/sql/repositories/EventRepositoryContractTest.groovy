@@ -24,7 +24,7 @@ abstract class EventRepositoryContractTest {
 
         def eventCount = 3
         def details = PageDetails.of(1, 10)
-        def ordering = null
+        def ordering = []
 
         def repository = populateDB(EventsStub.eventsList(eventCount))
 
@@ -40,7 +40,7 @@ abstract class EventRepositoryContractTest {
 
         def eventCount = 3
         def details = PageDetails.of(1, 2)
-        def ordering = null
+        def ordering = []
 
         def repository = populateDB(EventsStub.eventsList(eventCount))
 
@@ -56,7 +56,7 @@ abstract class EventRepositoryContractTest {
 
         int eventsCount = 1
         def details = PageDetails.of(2, 2)
-        def ordering = null
+        def ordering = []
 
         def repository = populateDB(EventsStub.eventsList(eventsCount))
 
@@ -65,7 +65,6 @@ abstract class EventRepositoryContractTest {
         JUnit5Assertions.assertEquals(0, events.size())
     }
 
-
     @Test
     void """given database has events
             when retrieved
@@ -73,7 +72,7 @@ abstract class EventRepositoryContractTest {
 
         def eventCount = 2
         def details = PageDetails.of(1, 10)
-        def ordering = null
+        def ordering = []
 
         def repository = populateDB(EventsStub.eventsList(eventCount))
 
@@ -95,7 +94,7 @@ abstract class EventRepositoryContractTest {
 
         def eventCount = 3
         def details = PageDetails.of(1, eventCount)
-        Ordering ordering = Ordering.of("userId", isAscending)
+        def ordering = [Ordering.of("userId", isAscending)]
 
         def repository = populateDB(EventsStub.eventsList(eventCount))
 
@@ -118,7 +117,7 @@ abstract class EventRepositoryContractTest {
 
         def eventCount = 3
         def details = PageDetails.of(1, eventCount)
-        Ordering ordering = Ordering.of("cpu", isAscending)
+        def ordering = [Ordering.of("cpu", isAscending)]
 
         def repository = populateDB(EventsStub.eventsList(eventCount))
 
@@ -137,7 +136,7 @@ abstract class EventRepositoryContractTest {
 
         def eventCount = 3
         def details = PageDetails.of(1, eventCount)
-        Ordering ordering = null
+        def ordering = []
 
         def repository = populateDB(EventsStub.eventsList(eventCount))
 
