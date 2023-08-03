@@ -2,7 +2,6 @@ package io.seqera.events.infra.sql.repositories
 
 import groovy.sql.Sql
 import groovy.transform.CompileStatic
-import groovyjarjarantlr4.v4.runtime.misc.Nullable
 import io.seqera.events.domain.event.Event
 import io.seqera.events.domain.event.EventRepository
 import io.seqera.events.domain.pagination.Ordering
@@ -50,31 +49,34 @@ class SqlEventRepository implements EventRepository {
     }
 
     @Override
-    List<Event> retrievePage(PageDetails pageDetails, @Nullable Ordering ordering) {
-        if (!validateArguments(pageDetails, ordering, Event.&isFieldNameValid)) {
+    List<Event> retrievePage(PageDetails pageDetails, List<Ordering> orderings) {
+        if (!validateArguments(pageDetails, orderings, Event.&isFieldNameValid)) {
             return []
         }
-        if (ordering) {
-            return retrievePageWithOrdering(pageDetails, ordering)
-        } else {
-            return retrievePageWithoutOrdering(pageDetails)
-        }
+        return orderings.isEmpty() ?
+                retrievePageWithoutOrdering(pageDetails) :
+                retrievePageWithOrdering(pageDetails, orderings)
     }
 
-    private List<Event> retrievePageWithOrdering(PageDetails pageDetails, Ordering ordering) {
-        def query = buildQueryWithOrdering(pageDetails, ordering)
+    private List<Event> retrievePageWithOrdering(PageDetails pageDetails, List<Ordering> orderings) {
+        def query = buildQueryWithOrdering(pageDetails, orderings)
         List<Event> results = []
         sql.eachRow(query) { row -> results << toEvent(row) }
         return results
     }
 
-    private GString buildQueryWithOrdering(PageDetails pageDetails, Ordering ordering) {
-        def asc = ordering.isAscending ? 'asc' : 'desc'
-        return """${Sql.expand(SELECT)} ${Sql.expand(tableName)} 
-                  where id >= ${Sql.expand(pageDetails.rangeStart())}
-                  order by ${Sql.expand(ordering.orderBy)} ${Sql.expand(asc)}
-                  limit ${Sql.expand(pageDetails.itemCount)}
-               """
+    private GString buildQueryWithOrdering(PageDetails pageDetails, List<Ordering> orderings) {
+        def orderClause = orderings.collect { ordering ->
+            "$ordering.orderBy ${ordering.sortOrder()}"
+        }.join(", ")
+
+        def query = """
+                ${Sql.expand(SELECT)} ${Sql.expand(tableName)}
+                where id >= ${Sql.expand(pageDetails.rangeStart())}
+                order by ${Sql.expand(orderClause)}
+                limit ${Sql.expand(pageDetails.itemCount)}"""
+        println query
+        return query
     }
 
     private List<Event> retrievePageWithoutOrdering(PageDetails pageDetails) {

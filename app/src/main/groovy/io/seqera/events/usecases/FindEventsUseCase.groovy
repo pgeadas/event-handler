@@ -14,7 +14,7 @@ class FindEventsUseCase {
         this.repository = repository
     }
 
-    List<Event> retrievePage(PageDetails pageDetails, @Nullable Ordering ordering = null) {
-        return repository.retrievePage(pageDetails, ordering)
+    List<Event> retrievePage(PageDetails pageDetails, @Nullable List<Ordering> orderings) {
+        return repository.retrievePage(pageDetails, orderings)
     }
 }

@@ -9,7 +9,7 @@ class PaginationSpec extends Specification {
     @Subject
     private Pagination<String> pagination = new Pagination<String>() {
         @Override
-        List<String> retrievePage(PageDetails pageDetails, Ordering ordering) {
+        List<String> retrievePage(PageDetails pageDetails, List<Ordering> orderings) {
             return []
         }
     }
@@ -23,13 +23,13 @@ class PaginationSpec extends Specification {
         result == expected
 
         where:
-        details              | orderBy                | validator                     | expected
-        PageDetails.of(1, 1) | null                   | null                          | true
-        PageDetails.of(1, 1) | null                   | { it -> it in ['id', 'mem'] } | true
-        PageDetails.of(1, 1) | Ordering.of('id')      | null                          | false
-        PageDetails.of(1, 1) | Ordering.of('invalid') | { it -> it in ['id', 'mem'] } | false
-        PageDetails.of(1, 1) | Ordering.of('id')      | { it -> it in ['id', 'mem'] } | true
-        PageDetails.of(1, 1) | Ordering.of('mem')     | { it -> it in ['id', 'mem'] } | true
+        details              | orderBy                  | validator                     | expected
+        PageDetails.of(1, 1) | []                       | null                          | true
+        PageDetails.of(1, 1) | []                       | { it -> it in ['id', 'mem'] } | true
+        PageDetails.of(1, 1) | [Ordering.of('id')]      | null                          | false
+        PageDetails.of(1, 1) | [Ordering.of('invalid')] | { it -> it in ['id', 'mem'] } | false
+        PageDetails.of(1, 1) | [Ordering.of('id')]      | { it -> it in ['id', 'mem'] } | true
+        PageDetails.of(1, 1) | [Ordering.of('mem')]     | { it -> it in ['id', 'mem'] } | true
     }
 
 }

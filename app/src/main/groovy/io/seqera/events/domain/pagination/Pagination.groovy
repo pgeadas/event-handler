@@ -6,11 +6,11 @@ import groovyjarjarantlr4.v4.runtime.misc.Nullable
 @CompileStatic
 interface Pagination<T> {
 
-    List<T> retrievePage(PageDetails pageDetails, @Nullable Ordering ordering)
+    List<T> retrievePage(PageDetails pageDetails, List<Ordering> orderings)
 
     default boolean validateArguments(
             PageDetails pageDetails,
-            @Nullable Ordering ordering = null,
+            List<Ordering> orderings,
             @Nullable Closure<Boolean> columnNameValidator = null) {
         if (pageDetails.itemCount <= 0) {
             println "Validation Error (itemCount): $pageDetails.itemCount"
@@ -20,15 +20,17 @@ interface Pagination<T> {
             println "Validation Error (pageNumber): $pageDetails.pageNumber"
             return false
         }
-        if (!ordering) {
+        if (orderings.isEmpty()) {
             return true
         } else if (columnNameValidator == null) {
             println "Validation Error (must provide columnNameValidator when Ordering is enabled) "
             return false
         }
-        if (!columnNameValidator.call(ordering.orderBy)) {
-            println "Validation Error (orderBy): $ordering.orderBy"
-            return false
+        for (Ordering ordering : orderings) {
+            if (!columnNameValidator.call(ordering.orderBy)) {
+                println "Validation Error (orderBy): $ordering.orderBy"
+                return false
+            }
         }
         return true
     }

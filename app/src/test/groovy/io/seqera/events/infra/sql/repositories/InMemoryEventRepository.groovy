@@ -1,7 +1,6 @@
 package io.seqera.events.infra.sql.repositories
 
 import groovy.transform.CompileStatic
-import groovyjarjarantlr4.v4.runtime.misc.Nullable
 import io.seqera.events.domain.event.Event
 import io.seqera.events.domain.event.EventRepository
 import io.seqera.events.domain.pagination.Ordering
@@ -27,23 +26,18 @@ class InMemoryEventRepository implements EventRepository {
         return event
     }
 
-    private void sortEventsList(Ordering ordering) {
-        EventComparator comparator = new EventComparator(ordering.orderBy)
-        if (ordering.isAscending) {
-            eventList.sort(comparator)
-        } else {
-            eventList.sort(comparator.reversed())
-        }
-    }
-
     @Override
-    List retrievePage(PageDetails pageDetails, @Nullable Ordering ordering) {
-        if (!validateArguments(pageDetails, ordering, Event.&isFieldNameValid)) {
+    List retrievePage(PageDetails pageDetails, List<Ordering> orderings) {
+        if (!validateArguments(pageDetails, orderings, Event.&isFieldNameValid)) {
             return []
         }
 
-        if (ordering) {
-            sortEventsList(ordering)
+        if (!orderings.isEmpty()) {
+            if (orderings[0].isAscending) {
+                eventList.sort(new EventComparator(orderings[0].orderBy))
+            } else {
+                eventList.sort(new EventComparator(orderings[0].orderBy).reversed())
+            }
         }
 
         int to = (pageDetails.itemCount > eventList.size() ? eventList.size() : pageDetails.itemCount) as int
@@ -55,8 +49,8 @@ class InMemoryEventRepository implements EventRepository {
 
         return eventList.subList(from, to)
     }
-}
 
+}
 
 class EventComparator implements Comparator<Event> {
     private String fieldToCompare

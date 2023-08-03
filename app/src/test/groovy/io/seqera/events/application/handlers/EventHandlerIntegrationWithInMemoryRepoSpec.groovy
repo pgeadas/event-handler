@@ -46,7 +46,7 @@ class EventHandlerIntegrationWithInMemoryRepoSpec extends Specification {
 
     def "test GET request handled in EventHandler"() {
         when:
-        def response = RestAssured.get("/events?pageNumber=1&itemCount=10&orderby=id&asc=true")
+        def response = RestAssured.get("/events?pageNumber=1&itemCount=10&orderby=id&sort=asc")
         String body = response.asString()
 
         then:
@@ -58,10 +58,10 @@ class EventHandlerIntegrationWithInMemoryRepoSpec extends Specification {
 
     @Unroll
     def """given a GET request
-        when valid pageNumber and itemCount and orderBy=#orderBy and isAscending=#isAsc
+        when valid pageNumber and itemCount and orderBy=#orderBy and sort=#sort
         then should return #statusCode code and sort results correctly"""() {
         when:
-        Response response = RestAssured.get("/events?pageNumber=1&itemCount=10&orderBy=${orderBy}&asc=${isAsc}")
+        Response response = RestAssured.get("/events?pageNumber=1&itemCount=10&orderBy=${orderBy}&sort=${sort}")
         String body = response.asString()
 
         then:
@@ -71,39 +71,39 @@ class EventHandlerIntegrationWithInMemoryRepoSpec extends Specification {
         events.stream().collect { it."$orderBy" } == expectedOrder
 
         where:
-        orderBy  | isAsc | expectedOrder                     | statusCode
-        "id"     | true  | ["0", "1", "2"]                   | HttpStatus.Ok.code
-        "id"     | false | ["2", "1", "0"]                   | HttpStatus.Ok.code
-        "userId" | true  | ["userId1", "userId2", "userId3"] | HttpStatus.Ok.code
-        "userId" | false | ["userId3", "userId2", "userId1"] | HttpStatus.Ok.code
+        orderBy  | sort   | expectedOrder                     | statusCode
+        "id"     | "asc"  | ["0", "1", "2"]                   | HttpStatus.Ok.code
+        "id"     | "desc" | ["2", "1", "0"]                   | HttpStatus.Ok.code
+        "userId" | "asc"  | ["userId1", "userId2", "userId3"] | HttpStatus.Ok.code
+        "userId" | "desc" | ["userId3", "userId2", "userId1"] | HttpStatus.Ok.code
     }
 
     @Unroll
     def """given a GET request
-        when #pageNumber and #itemCount and with #orderBy and #isAsc
+        when #pageNumber and #itemCount and with #orderBy and #sort
         then should return #statusCode code"""() {
         when:
-        Response response = RestAssured.get("/events?${pageNumber}&${itemCount}&${orderBy}&${isAsc}")
+        Response response = RestAssured.get("/events?${pageNumber}&${itemCount}&${orderBy}&${sort}")
 
         then:
         response.statusCode == statusCode
 
         where:
-        pageNumber      | itemCount       | orderBy           | isAsc         | statusCode
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=id"      | "asc=invalid" | HttpStatus.Ok.code
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=id"      | "asc=true"    | HttpStatus.Ok.code
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=id"      | "asc=false"   | HttpStatus.Ok.code
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=userId"  | "asc=true"    | HttpStatus.Ok.code
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=userId"  | "asc=false"   | HttpStatus.Ok.code
-        "pageNumber=1"  | "itemCount=1"   | null              | "asc=true"    | HttpStatus.Ok.code
-        "pageNumber=1"  | "itemCount=1"   | null              | "asc=false"   | HttpStatus.Ok.code
-        "pageNumber=-1" | "pageNumber=1"  | "orderBy=id"      | "asc=true"    | HttpStatus.BadRequest.code
-        "pageNumber=1"  | "pageNumber=-1" | "orderBy=id"      | "asc=true"    | HttpStatus.BadRequest.code
-        "pageNumber=1"  | "pageNumber=0"  | "orderBy=id"      | "asc=true"    | HttpStatus.BadRequest.code
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=invalid" | "asc=true"    | HttpStatus.BadRequest.code
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=invalid" | "asc=false"   | HttpStatus.BadRequest.code
-        " "             | "itemCount=1"   | null              | "asc=true"    | HttpStatus.BadRequest.code
-        "pageNumber=1"  | " "             | null              | "asc=false"   | HttpStatus.BadRequest.code
+        pageNumber      | itemCount       | orderBy           | sort           | statusCode
+        "pageNumber=1"  | "itemCount=1"   | "orderBy=id"      | "sort=asc"     | HttpStatus.Ok.code
+        "pageNumber=1"  | "itemCount=1"   | "orderBy=id"      | "sort=desc"    | HttpStatus.Ok.code
+        "pageNumber=1"  | "itemCount=1"   | "orderBy=userId"  | "sort=asc"     | HttpStatus.Ok.code
+        "pageNumber=1"  | "itemCount=1"   | "orderBy=userId"  | "sort=desc"    | HttpStatus.Ok.code
+        "pageNumber=1"  | "itemCount=1"   | []                | "sort=asc"     | HttpStatus.Ok.code
+        "pageNumber=1"  | "itemCount=1"   | []                | "sort=desc"    | HttpStatus.Ok.code
+        "pageNumber=1"  | "itemCount=1"   | "orderBy=id"      | "sort=invalid" | HttpStatus.BadRequest.code
+        "pageNumber=-1" | "pageNumber=1"  | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code
+        "pageNumber=1"  | "pageNumber=-1" | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code
+        "pageNumber=1"  | "pageNumber=0"  | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code
+        "pageNumber=1"  | "itemCount=1"   | "orderBy=invalid" | "sort=asc"     | HttpStatus.BadRequest.code
+        "pageNumber=1"  | "itemCount=1"   | "orderBy=invalid" | "sort=desc"    | HttpStatus.BadRequest.code
+        " "             | "itemCount=1"   | []                | "sort=asc"     | HttpStatus.BadRequest.code
+        "pageNumber=1"  | " "             | []                | "sort=desc"    | HttpStatus.BadRequest.code
     }
 
     @Unroll

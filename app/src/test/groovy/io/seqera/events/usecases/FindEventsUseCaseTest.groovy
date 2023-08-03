@@ -23,7 +23,7 @@ class FindEventsUseCaseTest {
     void """Given that we retrieve a page with specific values
             then the retrieval method is called using the same values"""() {
         PageDetails details = PageDetails.of(1, 1)
-        Ordering ordering = Ordering.of("id", true)
+        def ordering = [Ordering.of("id", true)]
         useCase.retrievePage(details, ordering)
         verify(repository).retrievePage(details, ordering)
         verifyNoMoreInteractions(repository)
@@ -33,7 +33,7 @@ class FindEventsUseCaseTest {
     void """Given that no values are provided for Ordering
             then should use defaults"""() {
         PageDetails details = PageDetails.of(1, 1)
-        Ordering ordering = null
+        List<Ordering> ordering = null
         useCase.retrievePage(details, ordering)
         verify(repository).retrievePage(details, ordering)
         verifyNoMoreInteractions(repository)
