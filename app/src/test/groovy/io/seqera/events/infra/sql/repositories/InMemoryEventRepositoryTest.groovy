@@ -3,7 +3,7 @@ package io.seqera.events.infra.sql.repositories
 import io.seqera.events.domain.event.Event
 import io.seqera.events.domain.event.EventRepository
 
-class InMemoryEventRepositoryTest extends EventRepositoryContractTest {
+class InMemoryEventRepositoryTest extends EventRepositoryContractSpec {
 
     @Override
     EventRepository populateDB(List<Event> events) {
