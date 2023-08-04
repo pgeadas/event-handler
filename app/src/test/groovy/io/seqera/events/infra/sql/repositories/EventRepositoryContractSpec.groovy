@@ -25,6 +25,7 @@ abstract class EventRepositoryContractSpec extends Specification {
 
         when:
         def events = repository.retrievePage(details, ordering)
+
         def eventIds = events.collect { it.id as int }
         def eventUserIds = events.collect { it.userId }
         def eventMemory = events.collect { it.mem as Long }

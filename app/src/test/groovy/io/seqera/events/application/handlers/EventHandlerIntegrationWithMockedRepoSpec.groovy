@@ -8,33 +8,38 @@ import io.restassured.response.Response
 import io.seqera.events.EventsStub
 import io.seqera.events.domain.event.Event
 import io.seqera.events.domain.event.EventRepository
-import io.seqera.events.infra.sql.repositories.InMemoryEventRepository
+import io.seqera.events.domain.pagination.Ordering
+import io.seqera.events.domain.pagination.PageDetails
 import io.seqera.events.usecases.FindEventsUseCase
 import io.seqera.events.usecases.SaveEventUseCase
 import io.seqera.events.utils.HttpStatus
 import io.seqera.events.utils.QueryParamParser
+import org.junit.jupiter.api.TestInstance
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class EventHandlerIntegrationWithInMemoryRepoSpec extends Specification {
+import static io.seqera.events.domain.pagination.PageDetails.of
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class EventHandlerIntegrationWithMockedRepoSpec extends Specification {
 
     @Shared
     private HttpServer httpServer
     @Shared
     private int serverPort = 8080
     @Shared
-    private EventRepository repository = new InMemoryEventRepository([])
+    def repository = Stub(EventRepository)
     @Shared
     private Properties properties = new Properties()
 
     def setupSpec() {
-        EventsStub.eventsList(3).forEach { repository.save(it) }
-
+        repository.retrievePage(_ as PageDetails, _ as List<Ordering>) >> EventsStub.eventsListWithId(3)
         EventHandler handler = new EventHandler(
                 new FindEventsUseCase(repository),
                 new SaveEventUseCase(repository),
-                properties, new QueryParamParser()
+                properties,
+                new QueryParamParser()
         )
         httpServer = HttpServer.create(new InetSocketAddress(serverPort), 0).with {
             createContext(handler.handlerPath, handler)
@@ -42,6 +47,13 @@ class EventHandlerIntegrationWithInMemoryRepoSpec extends Specification {
         }
         RestAssured.baseURI = "http://localhost"
         RestAssured.port = serverPort
+    }
+
+    void cleanupSpec() {
+        try {
+            httpServer.stop(0)
+        } catch (ignored) {
+        }
     }
 
     def "test GET request handled in EventHandler"() {
@@ -68,42 +80,78 @@ class EventHandlerIntegrationWithInMemoryRepoSpec extends Specification {
         response.statusCode == statusCode
         List<Event> events = JsonPath.from(body).getList('data')
         events.size() == 3
-        events.stream().collect { it."$orderBy" } == expectedOrder
 
         where:
-        orderBy  | sort   | expectedOrder                     | statusCode
-        "id"     | "asc"  | ["0", "1", "2"]                   | HttpStatus.Ok.code
-        "id"     | "desc" | ["2", "1", "0"]                   | HttpStatus.Ok.code
-        "userId" | "asc"  | ["userId1", "userId2", "userId3"] | HttpStatus.Ok.code
-        "userId" | "desc" | ["userId3", "userId2", "userId1"] | HttpStatus.Ok.code
+        orderBy  | sort   | statusCode
+        "id"     | "asc"  | HttpStatus.Ok.code
+        "id"     | "desc" | HttpStatus.Ok.code
+        "userId" | "asc"  | HttpStatus.Ok.code
+        "userId" | "desc" | HttpStatus.Ok.code
     }
 
     @Unroll
-    def """given a GET request
-        when #pageNumber and #itemCount and with #orderBy and #sort
+    def """given the repository returns some events
+        when pageNumber=1 and itemCount=3 and with #orderBy and #sort
+        then should return #statusCode code"""() {
+
+        when:
+        Response response = RestAssured.get("/events?pageNumber=1&itemCount=3&${orderBy}&${sort}")
+        String body = response.asString()
+        List<Event> events = JsonPath.from(body).getList('data')
+
+        then:
+        response.statusCode() == HttpStatus.Ok.code
+        response.contentType() == ContentType.JSON.toString()
+        events.size() == 3
+        // make sure our repo received the request with the given parameters
+        // 1 * repository.retrievePage(pageDetails, ordering) // Unfortunately this does not work :( need to use Mockito
+
+        where:
+        pageDetails | ordering                            | orderBy             | sort            | statusCode
+        of(1, 3)    | of(["id"], [false])                 | "orderBy=id"        | "sort=desc"     | HttpStatus.Ok.code
+        of(1, 3)    | of(["userId"], [true])              | "orderBy=userId"    | "sort=asc"      | HttpStatus.Ok.code
+        of(1, 3)    | []                                  | " "                 | "sort=asc"      | HttpStatus.Ok.code
+        of(1, 3)    | []                                  | " "                 | "sort=desc"     | HttpStatus.Ok.code
+        of(1, 3)    | of(["id", "userId"], [false, true]) | "orderBy=id,userId" | "sort=desc"     | HttpStatus.Ok.code
+        of(1, 3)    | of(["id", "userId"], [false, true]) | "orderBy=id,userId" | "sort=desc,asc" | HttpStatus.Ok.code
+        of(1, 3)    | of(["id"], [false])                 | "orderBy=id"        | "sort=desc,asc" | HttpStatus.Ok.code
+        of(1, 3)    | []                                  | "orderBy="          | "sort=desc,asc" | HttpStatus.Ok.code
+        of(1, 3)    | of(["id", "userId"], [true, true])  | "orderBy=id,userId" | "sort="         | HttpStatus.Ok.code
+    }
+
+    @Unroll
+    def """given an invalid GET request
+        when #pageNumber and #itemCount and #orderBy and #sort
         then should return #statusCode code"""() {
         when:
         Response response = RestAssured.get("/events?${pageNumber}&${itemCount}&${orderBy}&${sort}")
+        String body = response.asString()
+        String error = JsonPath.from(body).getString('error')
 
         then:
-        response.statusCode == statusCode
+        response.statusCode() == HttpStatus.BadRequest.code
+        response.contentType() == ContentType.JSON.toString()
+        error != null
+        // 0 * repository.retrievePage(_, _)
 
         where:
         pageNumber      | itemCount       | orderBy           | sort           | statusCode
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=id"      | "sort=asc"     | HttpStatus.Ok.code
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=id"      | "sort=desc"    | HttpStatus.Ok.code
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=userId"  | "sort=asc"     | HttpStatus.Ok.code
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=userId"  | "sort=desc"    | HttpStatus.Ok.code
-        "pageNumber=1"  | "itemCount=1"   | []                | "sort=asc"     | HttpStatus.Ok.code
-        "pageNumber=1"  | "itemCount=1"   | []                | "sort=desc"    | HttpStatus.Ok.code
         "pageNumber=1"  | "itemCount=1"   | "orderBy=id"      | "sort=invalid" | HttpStatus.BadRequest.code
         "pageNumber=-1" | "pageNumber=1"  | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code
         "pageNumber=1"  | "pageNumber=-1" | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code
         "pageNumber=1"  | "pageNumber=0"  | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code
         "pageNumber=1"  | "itemCount=1"   | "orderBy=invalid" | "sort=asc"     | HttpStatus.BadRequest.code
         "pageNumber=1"  | "itemCount=1"   | "orderBy=invalid" | "sort=desc"    | HttpStatus.BadRequest.code
-        " "             | "itemCount=1"   | []                | "sort=asc"     | HttpStatus.BadRequest.code
-        "pageNumber=1"  | " "             | []                | "sort=desc"    | HttpStatus.BadRequest.code
+        " "             | "itemCount=1"   | " "               | "sort=asc"     | HttpStatus.BadRequest.code
+        "pageNumber=1"  | " "             | " "               | "sort=desc"    | HttpStatus.BadRequest.code
+    }
+
+    static List<Ordering> of(List<String> columns, List<Boolean> sortOrders) {
+        List<Ordering> orderings = []
+        for (i in 0..<columns.size()) {
+            orderings << Ordering.of(columns[i], sortOrders[i])
+        }
+        return orderings
     }
 
     @Unroll
