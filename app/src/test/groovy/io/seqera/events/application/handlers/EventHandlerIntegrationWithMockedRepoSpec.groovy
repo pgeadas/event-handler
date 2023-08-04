@@ -32,6 +32,10 @@ class EventHandlerIntegrationWithMockedRepoSpec extends Specification {
     def repository = Stub(EventRepository)
     @Shared
     private Properties properties = new Properties()
+    @Shared
+    private String defaultMissingParams = EventHandler.QueryParamValidator.DEFAULT_MISSING_PARAMS_MESSAGE
+    @Shared
+    private String defaultInvalidParams = EventHandler.QueryParamValidator.DEFAULT_INVALID_PARAMS_MESSAGE
 
     def setupSpec() {
         repository.retrievePage(_ as PageDetails, _ as List<Ordering>) >> EventsStub.eventsListWithId(3)
@@ -158,6 +162,9 @@ class EventHandlerIntegrationWithMockedRepoSpec extends Specification {
     def """given a GET request
         when #pageNumber and #itemCount and without orderBy
         then should return #statusCode code and '#message'"""() {
+        given:
+
+
         when:
         Response response = RestAssured.get("/events?${pageNumber}&${itemCount}")
         def from = JsonPath.from(response.asString())
@@ -170,21 +177,20 @@ class EventHandlerIntegrationWithMockedRepoSpec extends Specification {
         response.statusCode == statusCode
         error == message
 
-        /* TODO: to properly validate the methods that assert on the error messages returned, we need to load them
-                 from properties. For now they are hardcoded */
+
         where:
         pageNumber           | itemCount           | statusCode                 | message
         "pageNumber=1"       | "itemCount=1"       | HttpStatus.Ok.code         | "Ok"
-        "pageNumber=1000"    | "itemCount=1"       | HttpStatus.Ok.code         | "Ok" // no limit
-        "pageNumber=1"       | "itemCount=1000"    | HttpStatus.Ok.code         | "Ok"// returns the default max
-        "pageNumber=1"       | "itemCount=0"       | HttpStatus.BadRequest.code | "Invalid params: itemCount"
-        "pageNumber=0"       | "itemCount=1"       | HttpStatus.BadRequest.code | "Invalid params: pageNumber"
-        "pageNumber=1"       | "itemCount=-1"      | HttpStatus.BadRequest.code | "Invalid params: pageNumber/itemCount"
-        "pageNumber=-1"      | "itemCount=1"       | HttpStatus.BadRequest.code | "Invalid params: pageNumber/itemCount"
-        "pageNumber=invalid" | "itemCount=1"       | HttpStatus.BadRequest.code | "Invalid params: pageNumber"
-        "pageNumber=1"       | "itemCount=invalid" | HttpStatus.BadRequest.code | "Invalid params: itemCount"
-        " "                  | "itemCount=1"       | HttpStatus.BadRequest.code | "Missing params: pageNumber/itemCount"
-        "pageNumber=1"       | " "                 | HttpStatus.BadRequest.code | "Missing params: pageNumber/itemCount"
+        "pageNumber=1000"    | "itemCount=1"       | HttpStatus.Ok.code         | "Ok"
+        "pageNumber=1"       | "itemCount=1000"    | HttpStatus.Ok.code         | "Ok"
+        "pageNumber=1"       | "itemCount=0"       | HttpStatus.BadRequest.code | "$defaultInvalidParams: itemCount"
+        "pageNumber=0"       | "itemCount=1"       | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber"
+        "pageNumber=1"       | "itemCount=-1"      | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber/itemCount"
+        "pageNumber=-1"      | "itemCount=1"       | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber/itemCount"
+        "pageNumber=invalid" | "itemCount=1"       | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber"
+        "pageNumber=1"       | "itemCount=invalid" | HttpStatus.BadRequest.code | "$defaultInvalidParams: itemCount"
+        " "                  | "itemCount=1"       | HttpStatus.BadRequest.code | "$defaultMissingParams: pageNumber/itemCount"
+        "pageNumber=1"       | " "                 | HttpStatus.BadRequest.code | "$defaultMissingParams: pageNumber/itemCount"
     }
 
 }

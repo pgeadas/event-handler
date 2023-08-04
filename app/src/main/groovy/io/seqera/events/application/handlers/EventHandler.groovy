@@ -148,19 +148,19 @@ class EventHandler extends JsonHandler {
     class QueryParamValidator {
 
         private static final String INVALID_PARAMS_MESSAGE = 'request.invalid.params'
-        private static final String DEFAULT_INVALID_PARAMS_MESSAGE = 'Invalid params'
+        static final String DEFAULT_INVALID_PARAMS_MESSAGE = 'Invalid params'
 
         private static final String MISSING_PARAMS_MESSAGE = 'request.missing.params'
-        private static final String DEFAULT_MISSING_PARAMS_MESSAGE = 'Missing params'
+        static final String DEFAULT_MISSING_PARAMS_MESSAGE = 'Missing params'
 
         private static final String INTERNAL_SERVER_ERROR_MESSAGE = 'internal.server-error'
-        private static final String DEFAULT_INTERNAL_SERVER_ERROR_MESSAGE = 'Internal server error'
+        static final String DEFAULT_INTERNAL_SERVER_ERROR_MESSAGE = 'Internal server error'
 
         private static final String INVALID_BODY_MESSAGE = 'request.invalid.body'
-        private static final String DEFAULT_INVALID_BODY_MESSAGE = 'Invalid request body'
+        static final String DEFAULT_INVALID_BODY_MESSAGE = 'Invalid request body'
 
         private static final String MAX_ITEM_COUNT = 'request.get.defaults.itemCount'
-        static final int DEFAULT_MAX_ITEM_COUNT = 200
+        static final int DEFAULT_MAX_ITEM_COUNT = 100
 
         private static final String DEFAULT_SORTING_ORDER = 'asc'
 
