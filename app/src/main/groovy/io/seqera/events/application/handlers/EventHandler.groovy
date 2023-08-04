@@ -84,7 +84,7 @@ class EventHandler extends JsonHandler {
             return
         }
 
-        List<Ordering> orderings = queryParamValidator.validateOrdering(queryParams, properties)
+        List<Ordering> orderings = queryParamValidator.validateOrdering(queryParams)
         if (orderings == null) {
             println queryParamValidator.invalidParamsMessageOrDefault("orderBy/asc")
             sendErrorResponse(http, queryParamValidator.invalidParamsMessageOrDefault("orderBy/asc"), HttpStatus.BadRequest.code)
@@ -145,7 +145,7 @@ class EventHandler extends JsonHandler {
     }
 
     @CompileStatic
-    private class QueryParamValidator {
+    class QueryParamValidator {
 
         private static final String INVALID_PARAMS_MESSAGE = 'request.invalid.params'
         private static final String DEFAULT_INVALID_PARAMS_MESSAGE = 'Invalid params'
@@ -160,12 +160,8 @@ class EventHandler extends JsonHandler {
         private static final String DEFAULT_INVALID_BODY_MESSAGE = 'Invalid request body'
 
         private static final String MAX_ITEM_COUNT = 'request.get.defaults.itemCount'
-        private static final int DEFAULT_MAX_ITEM_COUNT = 200
+        static final int DEFAULT_MAX_ITEM_COUNT = 200
 
-        private static final String ORDER_BY = 'request.get.defaults.orderBy'
-        private static final String DEFAULT_ORDER_BY = null
-
-        private static final String SORTING_ORDER = 'request.get.defaults.sorting.order'
         private static final String DEFAULT_SORTING_ORDER = 'asc'
 
         private final Properties properties
@@ -251,7 +247,7 @@ Using default maxItemCount: $DEFAULT_MAX_ITEM_COUNT"""
             return queryParams["pagenumber"] && queryParams["itemcount"]
         }
 
-        private static List<Ordering> validateOrdering(Map<String, String> queryParams, Properties properties) {
+        private static List<Ordering> validateOrdering(Map<String, String> queryParams) {
             if (!queryParams["orderby"]) {
                 return []
             }
@@ -259,15 +255,15 @@ Using default maxItemCount: $DEFAULT_MAX_ITEM_COUNT"""
 
             String sortingOrder
             if (!queryParams["sort"]) {
-                sortingOrder = properties.getProperty(SORTING_ORDER, DEFAULT_SORTING_ORDER)
+                sortingOrder = DEFAULT_SORTING_ORDER
             } else {
                 sortingOrder = queryParams["sort"]
             }
 
             try {
-                return validateOrderings(orderBy, sortingOrder, properties.getProperty(SORTING_ORDER, DEFAULT_SORTING_ORDER))
-            } catch (e) {
-                println e
+                return validateOrderings(orderBy, sortingOrder, DEFAULT_SORTING_ORDER)
+            } catch (ex) {
+                println "Failed to validate Orderings: ${ex}"
                 return null
             }
         }

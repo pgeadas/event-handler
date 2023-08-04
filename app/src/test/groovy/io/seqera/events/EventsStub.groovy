@@ -26,6 +26,20 @@ class EventsStub {
         return events
     }
 
+    static List<Event> eventsListWithId(int count) {
+        List<Event> events = []
+        for (i in 1..count) {
+            events << Event.of(
+                    "${i - 1}",
+                    "$WORKSPACE_ID${i}",
+                    "$USER_ID${i}",
+                    MEM - i,
+                    CPU * i,
+                    IO)
+        }
+        return events
+    }
+
     static Event full() {
         return Event.of(
                 ID,

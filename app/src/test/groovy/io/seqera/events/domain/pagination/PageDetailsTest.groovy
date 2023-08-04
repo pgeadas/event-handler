@@ -43,4 +43,12 @@ class PageDetailsTest {
         Assertions.assertNotNull(PageDetails.of(1, 1))
     }
 
+    @Test
+    void """"given same itemCount and pageNumber
+             then should be equals"""() {
+        def pd1 = PageDetails.of(1, 3)
+        def pd2 = PageDetails.of(1, 3)
+        Assertions.assertEquals(pd1, pd2)
+    }
+
 }
