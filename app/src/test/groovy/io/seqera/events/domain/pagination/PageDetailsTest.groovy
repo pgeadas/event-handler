@@ -49,6 +49,16 @@ class PageDetailsTest {
         def pd1 = PageDetails.of(1, 3)
         def pd2 = PageDetails.of(1, 3)
         Assertions.assertEquals(pd1, pd2)
+        Assertions.assertEquals(pd1.hashCode(), pd2.hashCode())
+    }
+
+    @Test
+    void """"given different itemCount and pageNumber
+             then should be equals"""() {
+        def pd1 = PageDetails.of(11, 3)
+        def pd2 = PageDetails.of(1, 3)
+        Assertions.assertNotEquals(pd1, pd2)
+        Assertions.assertNotEquals(pd1.hashCode(), pd2.hashCode())
     }
 
 }

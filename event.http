@@ -1,5 +1,5 @@
 ### GET request with a header
-GET http://localhost:8000/events?pageNumber=1&itemCount=3&orderBy=mem&sort=false
+GET http://localhost:8000/events?pageNumber=0&itemCount=3&orderBy=mem&sort=false
 
 ### GET request with a header
 GET http://localhost:8000/events
@@ -13,7 +13,7 @@ Content-Type: application/json
   "userId": "userId",
   "mem": 2,
   "cpu": 80,
-  "io": 4
+  "io": 40
 }
 
 
