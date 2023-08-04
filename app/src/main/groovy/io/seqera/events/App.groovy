@@ -13,14 +13,6 @@ import io.seqera.events.usecases.SaveEventUseCase
 import io.seqera.events.utils.ConnectionProviderFactory
 import io.seqera.events.utils.QueryParamParser
 
-// TODO: list of improvements (not related with pagination)
-// 1: add Logger instead of print
-// 2: add async processing of requests (queue)
-// 4: Flyway for automatic migrations
-// 5: add a wrapper class for response data
-// 6: tests for the load of properties
-// 8: fix reading properties from resource from a jar
-
 class App {
 
     private static final PORT = 8000
