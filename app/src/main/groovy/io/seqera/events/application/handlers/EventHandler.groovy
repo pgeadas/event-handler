@@ -64,14 +64,14 @@ class EventHandler extends JsonHandler {
         }
 
         Long pageNumber = queryParamValidator.validatePageNumber(queryParams)
-        if (!pageNumber) {
+        if (!pageNumber || pageNumber < 1) {
             println queryParamValidator.invalidParamsMessageOrDefault("pageNumber")
             sendErrorResponse(http, queryParamValidator.invalidParamsMessageOrDefault("pageNumber"), HttpStatus.BadRequest.code)
             return
         }
 
         Integer itemCount = queryParamValidator.validateItemCount(queryParams)
-        if (!itemCount) {
+        if (!itemCount || itemCount < 1) {
             println queryParamValidator.invalidParamsMessageOrDefault("itemCount")
             sendErrorResponse(http, queryParamValidator.invalidParamsMessageOrDefault("itemCount"), HttpStatus.BadRequest.code)
             return
@@ -86,8 +86,8 @@ class EventHandler extends JsonHandler {
 
         List<Ordering> orderings = queryParamValidator.validateOrdering(queryParams)
         if (orderings == null) {
-            println queryParamValidator.invalidParamsMessageOrDefault("orderBy/asc")
-            sendErrorResponse(http, queryParamValidator.invalidParamsMessageOrDefault("orderBy/asc"), HttpStatus.BadRequest.code)
+            println queryParamValidator.invalidParamsMessageOrDefault("orderBy/sort")
+            sendErrorResponse(http, queryParamValidator.invalidParamsMessageOrDefault("orderBy/sort"), HttpStatus.BadRequest.code)
             return
         }
 
@@ -128,7 +128,7 @@ class EventHandler extends JsonHandler {
             sendOkResponse(http, event, HttpStatus.Ok.code)
         } catch (RuntimeException ex) {
             println "Error saving event: $ex.stackTrace"
-            sendOkResponse(
+            sendErrorResponse(
                     http,
                     queryParamValidator.internalServerErrorMessageOrDefault(),
                     HttpStatus.InternalServerError.code

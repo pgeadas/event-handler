@@ -60,43 +60,10 @@ class EventHandlerIntegrationWithMockedRepoSpec extends Specification {
         }
     }
 
-    def "test GET request handled in EventHandler"() {
-        when:
-        def response = RestAssured.get("/events?pageNumber=1&itemCount=10&orderby=id&sort=asc")
-        String body = response.asString()
-
-        then:
-        response.statusCode() == HttpStatus.Ok.code
-        response.contentType() == ContentType.JSON.toString()
-        List<String> events = JsonPath.from(body).getList('data')
-        events.size() == 3
-    }
-
-    @Unroll
-    def """given a GET request
-        when valid pageNumber and itemCount and orderBy=#orderBy and sort=#sort
-        then should return #statusCode code and sort results correctly"""() {
-        when:
-        Response response = RestAssured.get("/events?pageNumber=1&itemCount=10&orderBy=${orderBy}&sort=${sort}")
-        String body = response.asString()
-
-        then:
-        response.statusCode == statusCode
-        List<Event> events = JsonPath.from(body).getList('data')
-        events.size() == 3
-
-        where:
-        orderBy  | sort   | statusCode
-        "id"     | "asc"  | HttpStatus.Ok.code
-        "id"     | "desc" | HttpStatus.Ok.code
-        "userId" | "asc"  | HttpStatus.Ok.code
-        "userId" | "desc" | HttpStatus.Ok.code
-    }
-
     @Unroll
     def """given the repository returns some events
-        when pageNumber=1 and itemCount=3 and with #orderBy and #sort
-        then should return #statusCode code"""() {
+        when doing valid GET with pageNumber=1 and itemCount=3 and with #orderBy and #sort
+        then should return #statusCode"""() {
 
         when:
         Response response = RestAssured.get("/events?pageNumber=1&itemCount=3&${orderBy}&${sort}")
@@ -112,21 +79,24 @@ class EventHandlerIntegrationWithMockedRepoSpec extends Specification {
 
         where:
         pageDetails | ordering                            | orderBy             | sort            | statusCode
-        of(1, 3)    | of(["id"], [false])                 | "orderBy=id"        | "sort=desc"     | HttpStatus.Ok.code
-        of(1, 3)    | of(["userId"], [true])              | "orderBy=userId"    | "sort=asc"      | HttpStatus.Ok.code
+        of(1, 3)    | []                                  | "orderBy=id"        | " "             | HttpStatus.Ok.code
+        of(1, 3)    | []                                  | "orderBy="          | " "             | HttpStatus.Ok.code
         of(1, 3)    | []                                  | " "                 | "sort=asc"      | HttpStatus.Ok.code
         of(1, 3)    | []                                  | " "                 | "sort=desc"     | HttpStatus.Ok.code
+        of(1, 3)    | []                                  | "orderBy="          | "sort=desc,asc" | HttpStatus.Ok.code
+        of(1, 3)    | of(["id"], [false])                 | "orderBy="          | "sort="         | HttpStatus.Ok.code
+        of(1, 3)    | of(["id"], [false])                 | "orderBy=id"        | "sort=desc"     | HttpStatus.Ok.code
+        of(1, 3)    | of(["id"], [false])                 | "orderBy=id"        | "sort=desc,asc" | HttpStatus.Ok.code
+        of(1, 3)    | of(["userId"], [true])              | "orderBy=userId"    | "sort=asc"      | HttpStatus.Ok.code
         of(1, 3)    | of(["id", "userId"], [false, true]) | "orderBy=id,userId" | "sort=desc"     | HttpStatus.Ok.code
         of(1, 3)    | of(["id", "userId"], [false, true]) | "orderBy=id,userId" | "sort=desc,asc" | HttpStatus.Ok.code
-        of(1, 3)    | of(["id"], [false])                 | "orderBy=id"        | "sort=desc,asc" | HttpStatus.Ok.code
-        of(1, 3)    | []                                  | "orderBy="          | "sort=desc,asc" | HttpStatus.Ok.code
         of(1, 3)    | of(["id", "userId"], [true, true])  | "orderBy=id,userId" | "sort="         | HttpStatus.Ok.code
     }
 
     @Unroll
-    def """given an invalid GET request
-        when #pageNumber and #itemCount and #orderBy and #sort
-        then should return #statusCode code"""() {
+    def """given the repository returns some events
+        when doing invalid GET with #pageNumber and #itemCount and #orderBy and #sort
+        then should return #statusCode and '#message'"""() {
         when:
         Response response = RestAssured.get("/events?${pageNumber}&${itemCount}&${orderBy}&${sort}")
         String body = response.asString()
@@ -135,19 +105,20 @@ class EventHandlerIntegrationWithMockedRepoSpec extends Specification {
         then:
         response.statusCode() == HttpStatus.BadRequest.code
         response.contentType() == ContentType.JSON.toString()
-        error != null
+        error == message
         // 0 * repository.retrievePage(_, _)
 
         where:
-        pageNumber      | itemCount       | orderBy           | sort           | statusCode
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=id"      | "sort=invalid" | HttpStatus.BadRequest.code
-        "pageNumber=-1" | "pageNumber=1"  | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code
-        "pageNumber=1"  | "pageNumber=-1" | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code
-        "pageNumber=1"  | "pageNumber=0"  | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=invalid" | "sort=asc"     | HttpStatus.BadRequest.code
-        "pageNumber=1"  | "itemCount=1"   | "orderBy=invalid" | "sort=desc"    | HttpStatus.BadRequest.code
-        " "             | "itemCount=1"   | " "               | "sort=asc"     | HttpStatus.BadRequest.code
-        "pageNumber=1"  | " "             | " "               | "sort=desc"    | HttpStatus.BadRequest.code
+        pageNumber      | itemCount      | orderBy           | sort           | statusCode                 | message
+        "pageNumber=1"  | "itemCount=1"  | "orderBy=id"      | "sort=invalid" | HttpStatus.BadRequest.code | "$defaultInvalidParams: orderBy/sort"
+        "pageNumber=1"  | "itemCount=1"  | "orderBy=invalid" | "sort=desc"    | HttpStatus.BadRequest.code | "$defaultInvalidParams: orderBy/sort"
+        "pageNumber=1"  | "itemCount=1"  | "orderBy=invalid" | "sort=asc"     | HttpStatus.BadRequest.code | "$defaultInvalidParams: orderBy/sort"
+        "pageNumber=-1" | "itemCount=1"  | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber"
+        "pageNumber=0"  | "itemCount=0"  | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber"
+        "pageNumber=1"  | "itemCount=-1" | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code | "$defaultInvalidParams: itemCount"
+        "pageNumber=1"  | "itemCount=0"  | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code | "$defaultInvalidParams: itemCount"
+        " "             | "itemCount=1"  | " "               | "sort=asc"     | HttpStatus.BadRequest.code | "$defaultMissingParams: pageNumber/itemCount"
+        "pageNumber=1"  | " "            | " "               | "sort=desc"    | HttpStatus.BadRequest.code | "$defaultMissingParams: pageNumber/itemCount"
     }
 
     static List<Ordering> of(List<String> columns, List<Boolean> sortOrders) {
@@ -156,41 +127,6 @@ class EventHandlerIntegrationWithMockedRepoSpec extends Specification {
             orderings << Ordering.of(columns[i], sortOrders[i])
         }
         return orderings
-    }
-
-    @Unroll
-    def """given a GET request
-        when #pageNumber and #itemCount and without orderBy
-        then should return #statusCode code and '#message'"""() {
-        given:
-
-
-        when:
-        Response response = RestAssured.get("/events?${pageNumber}&${itemCount}")
-        def from = JsonPath.from(response.asString())
-        String error = "Ok"
-        if (from.getString('error')) {
-            error = from.getString('error')
-        }
-
-        then:
-        response.statusCode == statusCode
-        error == message
-
-
-        where:
-        pageNumber           | itemCount           | statusCode                 | message
-        "pageNumber=1"       | "itemCount=1"       | HttpStatus.Ok.code         | "Ok"
-        "pageNumber=1000"    | "itemCount=1"       | HttpStatus.Ok.code         | "Ok"
-        "pageNumber=1"       | "itemCount=1000"    | HttpStatus.Ok.code         | "Ok"
-        "pageNumber=1"       | "itemCount=0"       | HttpStatus.BadRequest.code | "$defaultInvalidParams: itemCount"
-        "pageNumber=0"       | "itemCount=1"       | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber"
-        "pageNumber=1"       | "itemCount=-1"      | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber/itemCount"
-        "pageNumber=-1"      | "itemCount=1"       | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber/itemCount"
-        "pageNumber=invalid" | "itemCount=1"       | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber"
-        "pageNumber=1"       | "itemCount=invalid" | HttpStatus.BadRequest.code | "$defaultInvalidParams: itemCount"
-        " "                  | "itemCount=1"       | HttpStatus.BadRequest.code | "$defaultMissingParams: pageNumber/itemCount"
-        "pageNumber=1"       | " "                 | HttpStatus.BadRequest.code | "$defaultMissingParams: pageNumber/itemCount"
     }
 
 }

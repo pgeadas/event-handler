@@ -16,7 +16,7 @@ interface Pagination<T> {
             println "Validation Error (itemCount): $pageDetails.itemCount"
             return false
         }
-        if (pageDetails.pageNumber < 0) {
+        if (pageDetails.pageNumber <= 0) {
             println "Validation Error (pageNumber): $pageDetails.pageNumber"
             return false
         }
