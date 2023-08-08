@@ -5,7 +5,7 @@ import groovy.transform.CompileStatic
 @CompileStatic
 class Event {
 
-    static final def VALID_FIELD_NAMES = ["id", "workspaceId", "userId", "cpu", "mem", "io"]
+    static final String[] VALID_FIELD_NAMES = ["id", "workspaceId", "userId", "cpu", "mem", "io"]
 
     String id
     String workspaceId
@@ -22,7 +22,6 @@ class Event {
         return new Event(workspaceId: workspaceId, userId: userId, mem: mem, cpu: cpu, io: io)
     }
 
-    // try to use something like Object value1 = event1."$fieldToCompare"? What is more performant?
     static boolean isFieldNameValid(String fieldName) {
         return VALID_FIELD_NAMES.any { it == fieldName }
     }
