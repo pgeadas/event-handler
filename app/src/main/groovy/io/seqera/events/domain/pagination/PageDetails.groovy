@@ -1,8 +1,10 @@
 package io.seqera.events.domain.pagination
 
 import groovy.transform.CompileStatic
+import groovy.transform.EqualsAndHashCode
 
 @CompileStatic
+@EqualsAndHashCode
 class PageDetails {
     final long pageNumber
     final int itemCount
@@ -28,25 +30,6 @@ class PageDetails {
         if (itemCount < 1) {
             throw new IllegalArgumentException("Invalid itemCount: ${itemCount}")
         }
-    }
-
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (o == null || getClass() != o.class) return false
-
-        PageDetails that = (PageDetails) o
-
-        if (itemCount != that.itemCount) return false
-        if (pageNumber != that.pageNumber) return false
-
-        return true
-    }
-
-    int hashCode() {
-        int result
-        result = (int) (pageNumber ^ (pageNumber >>> 32))
-        result = 31 * result + itemCount
-        return result
     }
 
     @Override
