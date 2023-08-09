@@ -13,10 +13,11 @@ class SqlContextProvider {
     private final SqlDatabaseMigrator databaseMigrator
     private final YamlSlurper yamlSlurper
 
-    SqlContextProvider(String configName,
-                       ConnectionProviderFactory connectionProviderBuilder,
-                       SqlDatabaseMigrator databaseMigrator,
-                       YamlSlurper yamlSlurper) {
+    SqlContextProvider(
+            String configName = 'app.yaml',
+            ConnectionProviderFactory connectionProviderBuilder,
+            SqlDatabaseMigrator databaseMigrator,
+            YamlSlurper yamlSlurper) {
         this.configName = configName
         this.connectionProviderBuilder = connectionProviderBuilder
         this.databaseMigrator = databaseMigrator

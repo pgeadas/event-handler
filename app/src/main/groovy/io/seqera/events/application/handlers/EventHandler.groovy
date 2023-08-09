@@ -173,13 +173,13 @@ class EventHandler extends JsonHandler {
         static final int DEFAULT_MAX_ITEM_COUNT = 100
 
         // query param names
-        public static final String ASCENDING = 'asc'
+        private static final String ASCENDING = 'asc'
         private static final String DEFAULT_SORTING_ORDER = ASCENDING
-        public static final String DESCENDING = 'desc'
-        public static final String PAGE_NUMBER = 'pagenumber'
-        public static final String ITEM_COUNT = 'itemcount'
-        public static final String ORDER_BY = 'orderby'
-        public static final String SORTING_ORDER = 'sort'
+        private static final String DESCENDING = 'desc'
+        private static final String PAGE_NUMBER = 'pagenumber'
+        private static final String ITEM_COUNT = 'itemcount'
+        private static final String ORDER_BY = 'orderby'
+        private static final String SORTING_ORDER = 'sort'
 
         private final Properties properties
         private final int maxItemCountParsed
@@ -323,6 +323,5 @@ Using default maxItemCount: $DEFAULT_MAX_ITEM_COUNT"""
         private static boolean getIsAscendingOrDefault(List<String> sortingOrder, int index, String sortingOrderDefault) {
             return index < sortingOrder.size() ? sortingOrder[index] == ASCENDING : sortingOrderDefault
         }
-
     }
 }
