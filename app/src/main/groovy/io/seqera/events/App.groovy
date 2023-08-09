@@ -1,6 +1,7 @@
 package io.seqera.events
 
 import com.sun.net.httpserver.HttpServer
+import groovy.transform.CompileStatic
 import groovy.yaml.YamlSlurper
 import io.seqera.events.application.handlers.EventHandler
 import io.seqera.events.application.handlers.base.Handler
@@ -13,15 +14,15 @@ import io.seqera.events.usecases.SaveEventUseCase
 import io.seqera.events.utils.ConnectionProviderFactory
 import io.seqera.events.utils.QueryParamParser
 
+@CompileStatic
 class App {
 
-    private static final PORT = 8000
+    private static final int PORT = 8000
     private static final String EVENT = "EVENT"
     private static final String PROPERTIES_FILENAME = 'messages.properties'
 
     static void main(String[] args) {
         SqlContextProvider contextProvider = new SqlContextProvider(
-                'app.yaml',
                 new ConnectionProviderFactory(),
                 new SqlDatabaseMigrator(),
                 new YamlSlurper()
@@ -58,16 +59,16 @@ class App {
     }
 
     static HttpServer startServer(Handler[] handlers) {
-        return HttpServer.create(new InetSocketAddress(PORT), /*max backlog*/ 0).with {
-            println "Server is listening on ${PORT}, hit Ctrl+C to exit gracefully."
-            for (def h : handlers) {
-                createContext(h.handlerPath, h)
-            }
-            start()
+        def httpServer = HttpServer.create(new InetSocketAddress(PORT), /*max backlog*/ 0)
+        println "Server is listening on ${PORT}, hit Ctrl+C to exit gracefully."
+        for (def h : handlers) {
+            httpServer.createContext(h.handlerPath, h)
         }
+        httpServer.start()
+        return httpServer
     }
 
-    static Properties loadPropertiesFile(String configName) {
+    static Properties loadPropertiesFile(String configName = 'messages.properties') {
         def inputStream = App.classLoader.getResourceAsStream(configName)
         if (!inputStream) {
             throw new RuntimeException("Resource not found: $configName")

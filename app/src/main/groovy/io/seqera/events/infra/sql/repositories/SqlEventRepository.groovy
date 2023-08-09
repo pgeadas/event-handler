@@ -25,7 +25,7 @@ class SqlEventRepository implements EventRepository {
     private final String tableName
     private PreparedStatement retrievePageWithoutOrderBy
 
-    SqlEventRepository(Sql sql, String tableName) {
+    SqlEventRepository(Sql sql, String tableName = 'EVENT') {
         this.sql = sql
         this.tableName = tableName
         String query = buildQueryWithoutOrdering()
