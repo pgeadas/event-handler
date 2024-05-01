@@ -1,5 +1,9 @@
 package io.seqera.events.application.handlers
 
+import spock.lang.Shared
+import spock.lang.Specification
+import spock.lang.Unroll
+
 import com.sun.net.httpserver.HttpServer
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
@@ -14,14 +18,8 @@ import io.seqera.events.usecases.FindEventsUseCase
 import io.seqera.events.usecases.SaveEventUseCase
 import io.seqera.events.utils.HttpStatus
 import io.seqera.events.utils.QueryParamParser
-import org.junit.jupiter.api.TestInstance
-import spock.lang.Shared
-import spock.lang.Specification
-import spock.lang.Unroll
-
 import static io.seqera.events.domain.pagination.PageDetails.of
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EventHandlerIntegrationWithMockedRepoSpec extends Specification {
 
     @Shared
@@ -49,7 +47,7 @@ class EventHandlerIntegrationWithMockedRepoSpec extends Specification {
             createContext(handler.handlerPath, handler)
             start()
         }
-        RestAssured.baseURI = "http://localhost"
+        RestAssured.baseURI = 'http://localhost'
         RestAssured.port = serverPort
     }
 
@@ -79,18 +77,18 @@ class EventHandlerIntegrationWithMockedRepoSpec extends Specification {
 
         where:
         pageDetails | ordering                            | orderBy             | sort            | statusCode
-        of(1, 3)    | []                                  | "orderBy=id"        | " "             | HttpStatus.Ok.code
-        of(1, 3)    | []                                  | "orderBy="          | " "             | HttpStatus.Ok.code
-        of(1, 3)    | []                                  | " "                 | "sort=asc"      | HttpStatus.Ok.code
-        of(1, 3)    | []                                  | " "                 | "sort=desc"     | HttpStatus.Ok.code
-        of(1, 3)    | []                                  | "orderBy="          | "sort=desc,asc" | HttpStatus.Ok.code
-        of(1, 3)    | of(["id"], [false])                 | "orderBy="          | "sort="         | HttpStatus.Ok.code
-        of(1, 3)    | of(["id"], [false])                 | "orderBy=id"        | "sort=desc"     | HttpStatus.Ok.code
-        of(1, 3)    | of(["id"], [false])                 | "orderBy=id"        | "sort=desc,asc" | HttpStatus.Ok.code
-        of(1, 3)    | of(["userId"], [true])              | "orderBy=userId"    | "sort=asc"      | HttpStatus.Ok.code
-        of(1, 3)    | of(["id", "userId"], [false, true]) | "orderBy=id,userId" | "sort=desc"     | HttpStatus.Ok.code
-        of(1, 3)    | of(["id", "userId"], [false, true]) | "orderBy=id,userId" | "sort=desc,asc" | HttpStatus.Ok.code
-        of(1, 3)    | of(["id", "userId"], [true, true])  | "orderBy=id,userId" | "sort="         | HttpStatus.Ok.code
+        of(1, 3)    | []                                  | 'orderBy=id'        | ' '             | HttpStatus.Ok.code
+        of(1, 3)    | []                                  | 'orderBy='          | ' '             | HttpStatus.Ok.code
+        of(1, 3)    | []                                  | ' '                 | 'sort=asc'      | HttpStatus.Ok.code
+        of(1, 3)    | []                                  | ' '                 | 'sort=desc'     | HttpStatus.Ok.code
+        of(1, 3)    | []                                  | 'orderBy='          | 'sort=desc,asc' | HttpStatus.Ok.code
+        of(1, 3)    | of(['id'], [false])                 | 'orderBy='          | 'sort='         | HttpStatus.Ok.code
+        of(1, 3)    | of(['id'], [false])                 | 'orderBy=id'        | 'sort=desc'     | HttpStatus.Ok.code
+        of(1, 3)    | of(['id'], [false])                 | 'orderBy=id'        | 'sort=desc,asc' | HttpStatus.Ok.code
+        of(1, 3)    | of(['userId'], [true])              | 'orderBy=userId'    | 'sort=asc'      | HttpStatus.Ok.code
+        of(1, 3)    | of(['id', 'userId'], [false, true]) | 'orderBy=id,userId' | 'sort=desc'     | HttpStatus.Ok.code
+        of(1, 3)    | of(['id', 'userId'], [false, true]) | 'orderBy=id,userId' | 'sort=desc,asc' | HttpStatus.Ok.code
+        of(1, 3)    | of(['id', 'userId'], [true, true])  | 'orderBy=id,userId' | 'sort='         | HttpStatus.Ok.code
     }
 
     @Unroll
@@ -110,15 +108,15 @@ class EventHandlerIntegrationWithMockedRepoSpec extends Specification {
 
         where:
         pageNumber      | itemCount      | orderBy           | sort           | statusCode                 | message
-        "pageNumber=1"  | "itemCount=1"  | "orderBy=id"      | "sort=invalid" | HttpStatus.BadRequest.code | "$defaultInvalidParams: orderBy/sort"
-        "pageNumber=1"  | "itemCount=1"  | "orderBy=invalid" | "sort=desc"    | HttpStatus.BadRequest.code | "$defaultInvalidParams: orderBy/sort"
-        "pageNumber=1"  | "itemCount=1"  | "orderBy=invalid" | "sort=asc"     | HttpStatus.BadRequest.code | "$defaultInvalidParams: orderBy/sort"
-        "pageNumber=-1" | "itemCount=1"  | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber"
-        "pageNumber=0"  | "itemCount=0"  | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber"
-        "pageNumber=1"  | "itemCount=-1" | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code | "$defaultInvalidParams: itemCount"
-        "pageNumber=1"  | "itemCount=0"  | "orderBy=id"      | "sort=asc"     | HttpStatus.BadRequest.code | "$defaultInvalidParams: itemCount"
-        " "             | "itemCount=1"  | " "               | "sort=asc"     | HttpStatus.BadRequest.code | "$defaultMissingParams: pageNumber/itemCount"
-        "pageNumber=1"  | " "            | " "               | "sort=desc"    | HttpStatus.BadRequest.code | "$defaultMissingParams: pageNumber/itemCount"
+        'pageNumber=1'  | 'itemCount=1'  | 'orderBy=id'      | 'sort=invalid' | HttpStatus.BadRequest.code | "$defaultInvalidParams: orderBy/sort"
+        'pageNumber=1'  | 'itemCount=1'  | 'orderBy=invalid' | 'sort=desc'    | HttpStatus.BadRequest.code | "$defaultInvalidParams: orderBy/sort"
+        'pageNumber=1'  | 'itemCount=1'  | 'orderBy=invalid' | 'sort=asc'     | HttpStatus.BadRequest.code | "$defaultInvalidParams: orderBy/sort"
+        'pageNumber=-1' | 'itemCount=1'  | 'orderBy=id'      | 'sort=asc'     | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber"
+        'pageNumber=0'  | 'itemCount=0'  | 'orderBy=id'      | 'sort=asc'     | HttpStatus.BadRequest.code | "$defaultInvalidParams: pageNumber"
+        'pageNumber=1'  | 'itemCount=-1' | 'orderBy=id'      | 'sort=asc'     | HttpStatus.BadRequest.code | "$defaultInvalidParams: itemCount"
+        'pageNumber=1'  | 'itemCount=0'  | 'orderBy=id'      | 'sort=asc'     | HttpStatus.BadRequest.code | "$defaultInvalidParams: itemCount"
+        ' '             | 'itemCount=1'  | ' '               | 'sort=asc'     | HttpStatus.BadRequest.code | "$defaultMissingParams: pageNumber/itemCount"
+        'pageNumber=1'  | ' '            | ' '               | 'sort=desc'    | HttpStatus.BadRequest.code | "$defaultMissingParams: pageNumber/itemCount"
     }
 
     static List<Ordering> of(List<String> columns, List<Boolean> sortOrders) {

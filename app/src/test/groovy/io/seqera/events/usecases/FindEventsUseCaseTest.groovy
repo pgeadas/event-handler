@@ -1,11 +1,11 @@
 package io.seqera.events.usecases
 
-import io.seqera.events.domain.event.EventRepository
-import io.seqera.events.domain.pagination.Ordering
-import io.seqera.events.domain.pagination.PageDetails
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+import io.seqera.events.domain.event.EventRepository
+import io.seqera.events.domain.pagination.Ordering
+import io.seqera.events.domain.pagination.PageDetails
 import static org.mockito.Mockito.*
 
 class FindEventsUseCaseTest {
@@ -15,7 +15,7 @@ class FindEventsUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        repository = mock(EventRepository.class)
+        repository = mock(EventRepository)
         useCase = new FindEventsUseCase(repository)
     }
 
@@ -23,7 +23,7 @@ class FindEventsUseCaseTest {
     void """Given that we retrieve a page with specific values
             then the retrieval method is called using the same values"""() {
         PageDetails details = PageDetails.of(1, 1)
-        def ordering = [Ordering.of("id", true)]
+        def ordering = [Ordering.of('id', true)]
         useCase.retrievePage(details, ordering)
         verify(repository).retrievePage(details, ordering)
         verifyNoMoreInteractions(repository)
@@ -38,4 +38,5 @@ class FindEventsUseCaseTest {
         verify(repository).retrievePage(details, ordering)
         verifyNoMoreInteractions(repository)
     }
+
 }

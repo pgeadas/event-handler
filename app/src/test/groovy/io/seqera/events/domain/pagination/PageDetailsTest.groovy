@@ -1,6 +1,5 @@
 package io.seqera.events.domain.pagination
 
-
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -10,13 +9,13 @@ class PageDetailsTest {
 
     @ParameterizedTest
     @CsvSource([
-            "-1",
-            "0"]
+            '-1',
+            '0']
     )
     void """"given pageNumber is less than 1
              then should throw exception"""(long pageNumber) {
         Assertions.assertThrows(
-                IllegalArgumentException.class,
+                IllegalArgumentException,
                 () -> PageDetails.of(pageNumber, 1),
                 "Invalid pageNumber: ${pageNumber}"
         )
@@ -24,14 +23,14 @@ class PageDetailsTest {
 
     @ParameterizedTest
     @CsvSource([
-            "-1",
-            "0"]
+            '-1',
+            '0']
     )
     void """"given itemCount is less than 1
              then should throw exception"""() {
         def itemCount = -1
         Assertions.assertThrows(
-                IllegalArgumentException.class,
+                IllegalArgumentException,
                 () -> PageDetails.of(1, itemCount),
                 "Invalid itemCount: ${itemCount}"
         )

@@ -1,7 +1,7 @@
 package io.seqera.events.domain.pagination
 
 import groovy.transform.CompileStatic
-import groovy.transform.EqualsAndHashCode;
+import groovy.transform.EqualsAndHashCode
 
 @CompileStatic
 @EqualsAndHashCode
@@ -20,14 +20,15 @@ class Ordering {
     }
 
     String sortOrder() {
-        return isAscending ? "asc" : "desc"
+        return isAscending ? 'asc' : 'desc'
     }
 
     @Override
     String toString() {
-        return "Ordering{" +
+        return 'Ordering{' +
                 "orderBy='" + orderBy + '\'' +
-                ", isAscending=" + isAscending +
-                '}';
+                ', isAscending=' + isAscending +
+                '}'
     }
+
 }

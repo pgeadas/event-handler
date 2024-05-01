@@ -1,5 +1,10 @@
 package io.seqera.events.application.handlers
 
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+
 import com.sun.net.httpserver.HttpServer
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
@@ -13,11 +18,6 @@ import io.seqera.events.usecases.FindEventsUseCase
 import io.seqera.events.usecases.SaveEventUseCase
 import io.seqera.events.utils.HttpStatus
 import io.seqera.events.utils.QueryParamParser
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-
 import static org.mockito.ArgumentMatchers.*
 import static org.mockito.Mockito.*
 
@@ -40,7 +40,7 @@ class EventHandlerIntegrationWithMockedRepoTest {
             createContext(handler.handlerPath, handler)
             start()
         }
-        RestAssured.baseURI = "http://localhost"
+        RestAssured.baseURI = 'http://localhost'
         RestAssured.port = serverPort
     }
 
@@ -59,10 +59,10 @@ class EventHandlerIntegrationWithMockedRepoTest {
 
         def result = EventsStub.eventsList(3)
         def pageDetails = PageDetails.of(1, 10)
-        def orderings = Ordering.of("id", true)
+        def orderings = Ordering.of('id', true)
         when(repository.retrievePage(pageDetails, [orderings])).thenReturn(result)
 
-        def response = RestAssured.get("/events?pageNumber=1&itemCount=10&orderby=id&sort=asc")
+        def response = RestAssured.get('/events?pageNumber=1&itemCount=10&orderby=id&sort=asc')
         def data = JsonPath.from(response.getBody().asString()).getList('data')
 
         Assertions.assertEquals(HttpStatus.Ok.code, response.statusCode())
@@ -78,10 +78,10 @@ class EventHandlerIntegrationWithMockedRepoTest {
 
         List<Event> result = []
         def pageDetails = PageDetails.of(1, 10)
-        def orderings = Ordering.of("userId", true)
+        def orderings = Ordering.of('userId', true)
         when(repository.retrievePage(pageDetails, [orderings])).thenReturn(result)
 
-        def response = RestAssured.get("/events?pageNumber=1&itemCount=10&orderby=userId&sort=asc")
+        def response = RestAssured.get('/events?pageNumber=1&itemCount=10&orderby=userId&sort=asc')
         def data = JsonPath.from(response.getBody().asString()).getList('data')
 
         Assertions.assertEquals(HttpStatus.Ok.code, response.statusCode())
@@ -96,7 +96,7 @@ class EventHandlerIntegrationWithMockedRepoTest {
          then should answer with BadRequest and error"""() {
 
         reset(repository)
-        def response = RestAssured.get("/events")
+        def response = RestAssured.get('/events')
         String error = JsonPath.from(response.asString()).getString('error')
 
         Assertions.assertEquals(HttpStatus.BadRequest.code, response.statusCode())
@@ -110,9 +110,9 @@ class EventHandlerIntegrationWithMockedRepoTest {
          then should answer with InternalServerError and error"""() {
 
         def pageDetails = PageDetails.of(100, 10)
-        when(repository.retrievePage(eq(pageDetails), anyList())).thenThrow(new RuntimeException("Boing!"))
+        when(repository.retrievePage(eq(pageDetails), anyList())).thenThrow(new RuntimeException('Boing!'))
 
-        def response = RestAssured.get("/events?pageNumber=100&itemCount=10")
+        def response = RestAssured.get('/events?pageNumber=100&itemCount=10')
         String error = JsonPath.from(response.asString()).getString('error')
 
         Assertions.assertEquals(HttpStatus.InternalServerError.code, response.statusCode())
@@ -130,7 +130,7 @@ class EventHandlerIntegrationWithMockedRepoTest {
         def pageDetails = PageDetails.of(100, 100)
         when(repository.retrievePage(eq(pageDetails), anyList())).thenReturn(result)
 
-        def response = RestAssured.get("/events?pageNumber=100&itemCount=100")
+        def response = RestAssured.get('/events?pageNumber=100&itemCount=100')
         def data = JsonPath.from(response.asString()).getList('data')
 
         Assertions.assertEquals(HttpStatus.Ok.code, response.statusCode())
@@ -149,7 +149,7 @@ class EventHandlerIntegrationWithMockedRepoTest {
         def pageDetails = PageDetails.of(10, EventHandler.QueryParamValidator.DEFAULT_MAX_ITEM_COUNT)
         when(repository.retrievePage(eq(pageDetails), anyList())).thenReturn(result)
 
-        def response = RestAssured.get("/events?pageNumber=10&itemCount=1000")
+        def response = RestAssured.get('/events?pageNumber=10&itemCount=1000')
         def data = JsonPath.from(response.asString()).getList('data')
 
         Assertions.assertEquals(HttpStatus.Ok.code, response.statusCode())

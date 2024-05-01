@@ -1,6 +1,5 @@
 package io.seqera.events.usecases
 
-
 import io.seqera.events.domain.event.Event
 import io.seqera.events.domain.event.EventRepository
 import io.seqera.events.domain.pagination.Ordering
@@ -17,4 +16,5 @@ class FindEventsUseCase {
     List<Event> retrievePage(PageDetails pageDetails, List<Ordering> orderings) {
         return repository.retrievePage(pageDetails, orderings)
     }
+
 }

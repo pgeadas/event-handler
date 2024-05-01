@@ -5,7 +5,7 @@ import groovy.transform.CompileStatic
 @CompileStatic
 class QueryParamParser {
 
-    public static final String encoding = "UTF-8"
+    public static final String ENCODING = 'UTF-8'
 
     Map<String, String> parseQueryParams(String query) {
         Map<String, String> queryParametersMap = [:]
@@ -25,11 +25,12 @@ class QueryParamParser {
         return queryParametersMap
     }
 
-    String decodeQueryParam(String param) {
+    private static String decodeQueryParam(String param) {
         try {
-            return param ? URLDecoder.decode(param, encoding) : null
+            return param ? URLDecoder.decode(param, ENCODING) : null
         } catch (UnsupportedEncodingException ignored) {
             return param
         }
     }
+
 }

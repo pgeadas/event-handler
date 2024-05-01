@@ -1,14 +1,14 @@
 package io.seqera.events.infra.sql.repositories
 
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
 import groovy.sql.Sql
 import groovy.transform.CompileStatic
 import io.seqera.events.domain.event.Event
 import io.seqera.events.domain.event.EventRepository
 import io.seqera.events.domain.pagination.Ordering
 import io.seqera.events.domain.pagination.PageDetails
-
-import java.sql.PreparedStatement
-import java.sql.ResultSet
 
 /** Considerations:
  * I'm using prepared statements only when there is no orderBy, since we cannot prepare a statement
@@ -19,7 +19,7 @@ import java.sql.ResultSet
 @CompileStatic
 class SqlEventRepository implements EventRepository {
 
-    private static String SELECT = "select id, workspaceId, userId, mem, cpu, io from"
+    private static String SELECT = 'select id, workspaceId, userId, mem, cpu, io from'
 
     private final Sql sql
     private final String tableName
@@ -33,7 +33,7 @@ class SqlEventRepository implements EventRepository {
     }
 
     private String buildQueryWithoutOrdering() {
-        return """${SELECT} ${tableName} 
+        return """${SELECT} ${tableName}
                   where id >= ?
                   limit ?
                """
@@ -41,7 +41,7 @@ class SqlEventRepository implements EventRepository {
 
     @Override
     Event save(Event event) {
-        String query = """insert into ${tableName}(workspaceId, userId, cpu, mem, io) 
+        String query = """insert into ${tableName}(workspaceId, userId, cpu, mem, io)
                           values ('$event.workspaceId','$event.userId',$event.cpu,$event.mem,$event.io)"""
         def id = sql.executeInsert(query)[0][0] as Long
         event.id = id
@@ -68,7 +68,7 @@ class SqlEventRepository implements EventRepository {
     private GString buildQueryWithOrdering(PageDetails pageDetails, List<Ordering> orderings) {
         def orderClause = orderings.collect { ordering ->
             "$ordering.orderBy ${ordering.sortOrder()}"
-        }.join(", ")
+        }.join(', ')
 
         def query = """
                 ${Sql.expand(SELECT)} ${Sql.expand(tableName)}

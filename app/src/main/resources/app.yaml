@@ -5,6 +5,6 @@ app:
     migrations: db/hql
     username: sa
     password: sa
-    url: 'jdbc:hsqldb:mem:events'
-    driver: 'org.hsqldb.jdbcDriver'
+    url: "jdbc:hsqldb:mem:events"
+    driver: "org.hsqldb.jdbcDriver"
     dependency: '"org.hsqldb:hsqldb:2.7.2"'

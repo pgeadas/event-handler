@@ -4,7 +4,7 @@ app:
   database:
     migrations: db/hql
     username: sa
-    password: ''
-    url: 'jdbc:hsqldb:mem:eventsTest'
-    driver: 'org.hsqldb.jdbcDriver'
+    password: ""
+    url: "jdbc:hsqldb:mem:eventsTest"
+    driver: "org.hsqldb.jdbcDriver"
     dependency: '"org.hsqldb:hsqldb:2.7.2"'

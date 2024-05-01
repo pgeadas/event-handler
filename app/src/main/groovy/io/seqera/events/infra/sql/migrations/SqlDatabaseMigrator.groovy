@@ -32,7 +32,7 @@ class SqlDatabaseMigrator {
             throw new RuntimeException("Resource not found: $migrationFolder")
         }
         println "Loading migrations folder: ${url.toURI()}"
-        if (url.toURI().scheme == "file") {
+        if (url.toURI().scheme == 'file') {
             return new File(url.toURI())
         }
 
@@ -49,4 +49,5 @@ class SqlDatabaseMigrator {
     private static void migrate(Sql sql, File[] migrationFiles) {
         migrationFiles.each { sql.execute(it.text) }
     }
+
 }

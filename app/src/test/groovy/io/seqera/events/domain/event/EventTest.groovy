@@ -1,6 +1,5 @@
 package io.seqera.events.domain.event
 
-
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -25,12 +24,12 @@ class EventTest {
     void """Given an invalid fieldName
             when checking if a field name is valid
             then should return false """() {
-        String fieldName = "invalid"
+        String fieldName = 'invalid'
         Assertions.assertFalse(Event.isFieldNameValid(fieldName))
     }
 
     @ParameterizedTest
-    @ArgumentsSource(EventFieldNamesArgumentsSource.class)
+    @ArgumentsSource(EventFieldNamesArgumentsSource)
     void """Given a valid fieldName
             when checking if a field name is valid
             then should return true """(String fieldName) {
@@ -43,7 +42,7 @@ class EventFieldNamesArgumentsSource implements ArgumentsProvider {
 
     @Override
     Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-        return Event.VALID_FIELD_NAMES.stream().map { Arguments.of(it) }
+        return Event.VALID_FIELD_NAMES.collect { it -> Arguments.of(it) }.stream()
     }
 
 }
