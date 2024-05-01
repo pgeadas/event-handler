@@ -14,10 +14,10 @@ import io.seqera.events.utils.QueryParamParser
 @CompileStatic
 class EventHandler extends JsonHandler {
 
-    private static final String ORDER_BY_OR_SORT = "orderBy/sort"
-    private static final String PAGE_NUMBER_OR_ITEM_COUNT = "pageNumber/itemCount"
-    private static final String ITEM_COUNT = "itemCount"
-    private static final String PAGE_NUMBER = "pageNumber"
+    private static final String ORDER_BY_OR_SORT = 'orderBy/sort'
+    private static final String PAGE_NUMBER_OR_ITEM_COUNT = 'pageNumber/itemCount'
+    private static final String ITEM_COUNT = 'itemCount'
+    private static final String PAGE_NUMBER = 'pageNumber'
 
     private final QueryParamValidator queryParamValidator
     private final FindEventsUseCase findEventsUseCase
@@ -39,15 +39,23 @@ class EventHandler extends JsonHandler {
 
     @Override
     String getHandlerPath() {
-        return "/events"
+        return '/events'
     }
 
     @Override
     void handle(HttpExchange http) throws IOException {
         switch (http.requestMethod) {
-            case "POST" -> handlePost(http)
-            case "GET" -> handleGet(http)
-            default -> http.sendResponseHeaders(HttpStatus.MethodNotAllowed.code, 0)
+        // mega-linter complains because it is set for groovy3...
+        //            case "POST" -> handlePost(http)
+        //            case "GET" -> handleGet(http)
+            case 'POST':
+                handlePost(http)
+                break
+            case 'GET':
+                handleGet(http)
+                break
+            default:
+                http.sendResponseHeaders(HttpStatus.MethodNotAllowed.code, 0)
         }
     }
 
@@ -323,5 +331,7 @@ Using default maxItemCount: $DEFAULT_MAX_ITEM_COUNT"""
         private static boolean getIsAscendingOrDefault(List<String> sortingOrder, int index, String sortingOrderDefault) {
             return index < sortingOrder.size() ? sortingOrder[index] == ASCENDING : sortingOrderDefault
         }
+
     }
+
 }

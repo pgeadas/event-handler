@@ -32,7 +32,6 @@ application {
     mainClass = mainClassName
 }
 
-
 tasks.register('customFatJar', Jar) {
     manifest {
         attributes 'Main-Class': mainClassName
@@ -46,4 +45,3 @@ tasks.register('customFatJar', Jar) {
 test {
     useJUnitPlatform()
 }
-

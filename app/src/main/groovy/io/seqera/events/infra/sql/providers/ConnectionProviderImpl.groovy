@@ -15,4 +15,5 @@ class ConnectionProviderImpl implements ConnectionProvider {
     Sql getConnection() {
         return Sql.newInstance(serverUrl, username, password, driver)
     }
+
 }

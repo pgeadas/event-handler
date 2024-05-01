@@ -8,10 +8,12 @@ class PaginationSpec extends Specification {
 
     @Subject
     private Pagination<String> pagination = new Pagination<String>() {
+
         @Override
         List<String> retrievePage(PageDetails pageDetails, List<Ordering> orderings) {
             return []
         }
+
     }
 
     @Unroll

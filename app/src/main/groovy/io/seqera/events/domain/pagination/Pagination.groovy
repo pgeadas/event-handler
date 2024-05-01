@@ -23,7 +23,7 @@ interface Pagination<T> {
         if (orderings.isEmpty()) {
             return true
         } else if (columnNameValidator == null) {
-            println "Validation Error (must provide columnNameValidator when Ordering is enabled) "
+            println 'Validation Error (must provide columnNameValidator when Ordering is enabled) '
             return false
         }
         for (Ordering ordering : orderings) {

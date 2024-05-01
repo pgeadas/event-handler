@@ -18,7 +18,7 @@ import io.seqera.events.utils.QueryParamParser
 class App {
 
     private static final int PORT = 8000
-    private static final String EVENT = "EVENT"
+    private static final String EVENT = 'EVENT'
     private static final String PROPERTIES_FILENAME = 'messages.properties'
 
     static void main(String[] args) {
@@ -42,6 +42,7 @@ class App {
         def httpServer = startServer(handlers)
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
+
             @Override
             void run() {
                 println 'Server is shutting down'
@@ -55,6 +56,7 @@ class App {
                 }
                 println 'Server gracefully stopped'
             }
+
         })
     }
 

@@ -14,4 +14,5 @@ class SaveEventUseCase {
     Event save(Event event) {
         return repository.save(event)
     }
+
 }

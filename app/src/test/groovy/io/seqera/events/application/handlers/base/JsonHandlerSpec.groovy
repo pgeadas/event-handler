@@ -1,18 +1,19 @@
 package io.seqera.events.application.handlers.base
 
+import spock.lang.Specification
+
 import com.sun.net.httpserver.Headers
 import com.sun.net.httpserver.HttpContext
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpPrincipal
 import groovy.json.JsonOutput
-import spock.lang.Specification
 
-class JsonHandlerTest extends Specification {
+class JsonHandlerSpec extends Specification {
 
     private FakeJsonHandler handler
 
     def setup() {
-        handler = new FakeJsonHandler("/fakePath")
+        handler = new FakeJsonHandler('/fakePath')
     }
 
     def "getHandlerPath should return the defined path"() {
@@ -20,9 +21,8 @@ class JsonHandlerTest extends Specification {
         String path = handler.getHandlerPath()
 
         then:
-        path == "/fakePath"
+        path == '/fakePath'
     }
-
 
     def "parseText should correctly parse JSON text"() {
         given:
@@ -42,20 +42,20 @@ class JsonHandlerTest extends Specification {
         given:
         HttpExchange httpExchange = new TestHttpExchange()
         def obj = [orderBy: 'id', itemCount: 30]
-        def response = JsonOutput.toJson(["data": obj])
+        def response = JsonOutput.toJson(['data': obj])
 
         when:
         JsonHandler.sendOkResponse(httpExchange, obj, 200)
 
         then:
-        httpExchange.responseHeaders.getFirst("Content-type") == "application/json"
+        httpExchange.responseHeaders.getFirst('Content-type') == 'application/json'
         httpExchange.getResponseCode() == 200
-        httpExchange.getResponseLength() == response.getBytes("UTF-8").length
+        httpExchange.getResponseLength() == response.getBytes('UTF-8').length
         httpExchange.responseBody.toString() == response
     }
 
-
     private static class TestHttpExchange extends HttpExchange {
+
         private ByteArrayOutputStream responseBodyStream = new ByteArrayOutputStream()
         private Headers responseHeaders = new Headers()
         private int responseCode
@@ -92,7 +92,6 @@ class JsonHandlerTest extends Specification {
 
         @Override
         void close() {
-
         }
 
         @Override
@@ -138,12 +137,10 @@ class JsonHandlerTest extends Specification {
 
         @Override
         void setAttribute(String name, Object value) {
-
         }
 
         @Override
         void setStreams(InputStream i, OutputStream o) {
-
         }
 
         @Override
@@ -154,6 +151,7 @@ class JsonHandlerTest extends Specification {
     }
 
     private static class FakeJsonHandler extends JsonHandler {
+
         String handlerPath
 
         FakeJsonHandler(String handlerPath) {
@@ -169,7 +167,7 @@ class JsonHandlerTest extends Specification {
         String getHandlerPath() {
             return handlerPath
         }
+
     }
 
 }
-

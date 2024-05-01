@@ -6,9 +6,9 @@ import io.seqera.events.domain.event.Event
 @CompileStatic
 class EventsStub {
 
-    public static final String ID = "id"
-    public static final String WORKSPACE_ID = "workspaceId"
-    public static final String USER_ID = "userId"
+    public static final String ID = 'id'
+    public static final String WORKSPACE_ID = 'workspaceId'
+    public static final String USER_ID = 'userId'
     public static final long MEM = 10
     public static final long CPU = 10
     public static final int IO = 10

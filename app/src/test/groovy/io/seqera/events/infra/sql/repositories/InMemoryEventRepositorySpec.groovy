@@ -11,4 +11,5 @@ class InMemoryEventRepositorySpec extends EventRepositoryContractSpec {
         events.each { it.id = id++ }
         return new InMemoryEventRepository(events)
     }
+
 }

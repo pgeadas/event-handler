@@ -1,8 +1,5 @@
 package io.seqera.events.usecases
 
-import io.seqera.events.EventsStub
-import io.seqera.events.domain.event.Event
-import io.seqera.events.domain.event.EventRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.params.ParameterizedTest
@@ -12,6 +9,9 @@ import org.junit.jupiter.params.provider.ArgumentsSource
 
 import java.util.stream.Stream
 
+import io.seqera.events.EventsStub
+import io.seqera.events.domain.event.Event
+import io.seqera.events.domain.event.EventRepository
 import static org.mockito.Mockito.*
 
 class SaveEventUseCaseTest {
@@ -21,12 +21,12 @@ class SaveEventUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        repository = mock(EventRepository.class)
+        repository = mock(EventRepository)
         useCase = new SaveEventUseCase(repository)
     }
 
     @ParameterizedTest
-    @ArgumentsSource(EventsArgumentSource.class)
+    @ArgumentsSource(EventsArgumentSource)
     void "Should save a given Event"(Event event) {
         useCase.save(event)
         verify(repository).save(event)
@@ -44,6 +44,7 @@ class SaveEventUseCaseTest {
                     Arguments.of(EventsStub.withNullUserId())
             )
         }
+
     }
 
 }

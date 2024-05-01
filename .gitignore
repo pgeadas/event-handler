@@ -3,6 +3,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+.github/workflows/
 
 ### IntelliJ IDEA ###
 .idea/**
@@ -37,3 +38,4 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+megalinter-reports/

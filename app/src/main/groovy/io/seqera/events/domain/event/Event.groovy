@@ -5,7 +5,7 @@ import groovy.transform.CompileStatic
 @CompileStatic
 class Event {
 
-    static final String[] VALID_FIELD_NAMES = ["id", "workspaceId", "userId", "cpu", "mem", "io"]
+    static final String[] VALID_FIELD_NAMES = ['id', 'workspaceId', 'userId', 'cpu', 'mem', 'io']
 
     String id
     String workspaceId
@@ -28,14 +28,14 @@ class Event {
 
     @Override
     String toString() {
-        return "Event{" +
+        return 'Event{' +
                 "id='" + id + '\'' +
                 ", workspaceId='" + workspaceId + '\'' +
                 ", userId='" + userId + '\'' +
-                ", cpu=" + cpu +
-                ", mem=" + mem +
-                ", io=" + io +
-                '}';
+                ', cpu=' + cpu +
+                ', mem=' + mem +
+                ', io=' + io +
+                '}'
     }
 
 }

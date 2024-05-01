@@ -15,4 +15,5 @@ class ConnectionProviderFactory {
                 driver: databaseConfig['driver']
         )
     }
+
 }

@@ -6,6 +6,7 @@ import groovy.transform.EqualsAndHashCode
 @CompileStatic
 @EqualsAndHashCode
 class PageDetails {
+
     final long pageNumber
     final int itemCount
 
@@ -23,7 +24,7 @@ class PageDetails {
         return pageNumber * itemCount - itemCount
     }
 
-    static validate(long pageNumber, int itemCount) {
+    private static validate(long pageNumber, int itemCount) {
         if (pageNumber < 1) {
             throw new IllegalArgumentException("Invalid pageNumber: ${pageNumber}")
         }
@@ -34,9 +35,10 @@ class PageDetails {
 
     @Override
     String toString() {
-        return "PageDetails{" +
-                "pageNumber=" + pageNumber +
-                ", itemCount=" + itemCount +
-                '}';
+        return 'PageDetails{' +
+                'pageNumber=' + pageNumber +
+                ', itemCount=' + itemCount +
+                '}'
     }
+
 }

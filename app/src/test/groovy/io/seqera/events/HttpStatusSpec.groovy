@@ -1,7 +1,8 @@
 package io.seqera.events
 
-import io.seqera.events.utils.HttpStatus
 import spock.lang.Specification
+
+import io.seqera.events.utils.HttpStatus
 
 class HttpStatusSpec extends Specification {
 
@@ -25,4 +26,5 @@ class HttpStatusSpec extends Specification {
         500  | HttpStatus.InternalServerError
         300  | null
     }
+
 }
